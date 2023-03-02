@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    username: postgres
+    password: postgres
+    url: jdbc:postgresql://localhost:5432/messenger
+
+frontends:
+  telegram:
+    url: http://localhost:8090
