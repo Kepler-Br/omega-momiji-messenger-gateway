@@ -1,12 +1,9 @@
--- \c "postgres"
+\c "postgres"
 
-CREATE USER "user" WITH PASSWORD 'user';
+create database "gateway";
 
-GRANT ALL ON SCHEMA public TO "user";
--- GRANT USAGE, CREATE ON SCHEMA public TO user;
--- \c "user"
+\c "gateway"
+create user "nonroot" with password 'nonroot';
 
-CREATE DATABASE "messages";
-
--- GRANT ALL ON DATABASE "messages" TO "user";
-
+grant all on database "gateway" to "nonroot";
+grant all on schema public to "nonroot";

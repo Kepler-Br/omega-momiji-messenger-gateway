@@ -5,7 +5,7 @@ services:
     build:
       context: ./postgres-db
     ports:
-      - "5432:5432"
+      - "5429:5432"
     expose:
       - 5432
     environment:
@@ -22,10 +22,10 @@ services:
     volumes:
       - "./changelog:/liquibase/changelog"
     command: >
-      --url="jdbc:postgresql://postgres:5432/messages"
+      --url="jdbc:postgresql://postgres:5432/gateway"
       --changeLogFile=/changelog/changelog-master.yaml
-      --username=user
-      --password=user
+      --username=nonroot
+      --password=nonroot
       update
     depends_on:
       postgres:

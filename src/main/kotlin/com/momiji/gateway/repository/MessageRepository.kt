@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 
 
 @Repository
-interface MessageRepository : CrudRepository<MessageEntity, Long>
+interface MessageRepository : CrudRepository<MessageEntity, Long> {
+    fun getByFrontendAndNativeId(frontend: String, nativeId: String): MessageEntity
+}

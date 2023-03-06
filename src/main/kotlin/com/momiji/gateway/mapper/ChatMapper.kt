@@ -2,7 +2,6 @@ package com.momiji.gateway.mapper
 
 import com.momiji.gateway.controller.dto.ReceivedChat
 import com.momiji.gateway.repository.entity.ChatEntity
-import com.momiji.gateway.repository.entity.enumerator.MessengerFrontend
 import org.springframework.stereotype.Component
 
 @Component
@@ -16,11 +15,11 @@ class ChatMapper {
         )
     }
 
-    fun map(receivedChat: ReceivedChat, messengerFrontend: MessengerFrontend): ChatEntity {
+    fun map(receivedChat: ReceivedChat, messengerFrontend: String): ChatEntity {
         return ChatEntity(
             nativeId = receivedChat.id,
             title = receivedChat.title,
-            messenger = messengerFrontend,
+            frontend = messengerFrontend,
             type = receivedChat.type,
         )
     }

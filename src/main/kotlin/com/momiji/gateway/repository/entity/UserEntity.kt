@@ -1,11 +1,15 @@
 package com.momiji.gateway.repository.entity
 
-import com.momiji.gateway.repository.entity.enumerator.MessengerFrontend
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 
+
+@Table("users")
 data class UserEntity(
+    @Id
     var id: Long? = null,
-    var messenger: MessengerFrontend,
-    var nativeId: String,
     var username: String,
     var fullname: String,
+    var frontend: String,
+    var nativeId: String,
 )

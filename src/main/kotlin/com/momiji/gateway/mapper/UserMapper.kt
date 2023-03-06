@@ -2,7 +2,6 @@ package com.momiji.gateway.mapper
 
 import com.momiji.gateway.controller.dto.ReceivedUser
 import com.momiji.gateway.repository.entity.UserEntity
-import com.momiji.gateway.repository.entity.enumerator.MessengerFrontend
 import org.springframework.stereotype.Component
 
 @Component
@@ -16,9 +15,9 @@ class UserMapper {
         )
     }
 
-    fun map(value: ReceivedUser, messengerFrontend: MessengerFrontend): UserEntity {
+    fun map(value: ReceivedUser, messengerFrontend: String): UserEntity {
         return UserEntity(
-            messenger = messengerFrontend,
+            frontend = messengerFrontend,
             nativeId = value.id,
             username = value.username,
             fullname = value.fullname,

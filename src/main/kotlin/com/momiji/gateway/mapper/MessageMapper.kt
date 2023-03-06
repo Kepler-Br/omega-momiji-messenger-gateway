@@ -9,8 +9,8 @@ class MessageMapper {
 
     fun map(message: ReceivedMessage): MessageEntity {
         return MessageEntity(
-            origin = message.origin,
-            nativeId = message.messageId,
+            frontend = message.frontend,
+            nativeId = message.id,
             text = message.text,
         )
     }
