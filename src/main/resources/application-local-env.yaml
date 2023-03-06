@@ -4,6 +4,7 @@ spring:
     password: nonroot
     url: jdbc:postgresql://localhost:5429/gateway
 
-frontends:
-  telegram:
-    url: http://localhost:8090
+momiji:
+  frontends:
+    telegram:
+      url: http://localhost:8090
