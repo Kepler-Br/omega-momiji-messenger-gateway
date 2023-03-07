@@ -9,7 +9,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients
 @EnableFeignClients
 @SpringBootApplication
 @EnableConfigurationProperties
-@ConfigurationPropertiesScan("com.momiji.gateway.service")
+@ConfigurationPropertiesScan("com.momiji.gateway.config")
 class Application
 
 fun main(args: Array<String>) {

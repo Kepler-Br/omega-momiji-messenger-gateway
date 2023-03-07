@@ -1,15 +1,16 @@
-package com.momiji.gateway.service
+package com.momiji.gateway.config
 
 import com.momiji.gateway.external.api.FrontendApi
-import com.momiji.gateway.external.api.SendMessageRequest
+import com.momiji.gateway.frontend.FrontendContainer
+import feign.Contract
 import feign.Feign
 import feign.codec.Decoder
 import feign.codec.Encoder
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.cloud.openfeign.support.SpringMvcContract
+import org.springframework.cloud.openfeign.FeignClientsConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-
+import org.springframework.context.annotation.Import
 
 data class FrontendConfig(
     val url: String,
@@ -20,32 +21,28 @@ data class ConfiguredFrontends constructor(
     var frontends: Map<String, FrontendConfig>,
 )
 
-class FrontendContainer(
-    private val clients: HashMap<String, FrontendApi>,
-)
-
 @Configuration
+// TODO: What FeignClientsConfiguration do?
+@Import(FeignClientsConfiguration::class)
 class FrontendContainerConfiguration {
 
     @Bean
-    fun test(config: ConfiguredFrontends): FrontendContainer {
+    fun frontendContainer(
+        config: ConfiguredFrontends,
+        contract: Contract,
+        decoder: Decoder,
+        encoder: Encoder,
+    ): FrontendContainer {
         val clients = HashMap<String, FrontendApi>()
 
         for (frontend in config.frontends) {
             clients[frontend.key] = Feign.builder()
-//                .client(client)
-                .encoder(Encoder.Default())
-                .decoder(Decoder.Default())
-                .contract(SpringMvcContract())
+                .encoder(encoder)
+                .decoder(decoder)
+                .contract(contract)
                 .target(FrontendApi::class.java, frontend.value.url)
         }
-         clients["telegram"]!!.sendTextMessage(
-            SendMessageRequest(
-                text="",
-                chatId = "123",
-                replyTo = null,
-            )
-        )
+
         return FrontendContainer(clients)
     }
 }
