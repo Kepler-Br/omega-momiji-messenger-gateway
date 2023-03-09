@@ -1,6 +1,8 @@
 package com.momiji.gateway.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.momiji.gateway.repository.entity.enumerator.MessageType
+
 
 data class ReceivedMessage(
     @JsonProperty("id")
@@ -13,4 +15,8 @@ data class ReceivedMessage(
     val frontend: String,
     @JsonProperty("text")
     val text: String?,
+    @JsonProperty("type")
+    val type: MessageType,
+    @JsonProperty("action_info")
+    val actionInfo: ActionInfo?,
 )
