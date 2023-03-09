@@ -14,6 +14,7 @@ import com.momiji.gateway.repository.entity.MessageEntity
 import com.momiji.gateway.repository.entity.UserEntity
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import com.momiji.gateway.repository.entity.ChatEntity as ChatModel
 
 @Service
@@ -28,11 +29,11 @@ class MessageReceiverService(
 ) {
 
     private fun saveOrGetChat(chat: ReceivedChat, messengerFrontend: String): ChatModel {
-        return try {
-            return txExecutor.new {
-                chatRepository.save(
-                    chatMapper.map(chat, messengerFrontend)
-                )
+        val mappedChat = chatMapper.map(chat, messengerFrontend)
+
+        val savedChat = try {
+            txExecutor.new {
+                chatRepository.save(mappedChat)
             }
         } catch (e: DbActionExecutionException) {
             try {
@@ -45,14 +46,23 @@ class MessageReceiverService(
                 throw e
             }
         }
+
+        // Update DB if info changed
+        return if (mappedChat.title != savedChat.title) {
+            chatRepository.save(
+                savedChat.apply { this.title = mappedChat.title }
+            )
+        } else {
+            savedChat
+        }
     }
 
     private fun saveOrGetUser(user: ReceivedUser, messengerFrontend: String): UserEntity {
-        return try {
-            return txExecutor.new {
-                userRepository.save(
-                    userMapper.map(user, messengerFrontend)
-                )
+        val mappedUser = userMapper.map(user, messengerFrontend)
+
+        val savedUser = try {
+            txExecutor.new {
+                userRepository.save(mappedUser)
             }
         } catch (e: DbActionExecutionException) {
             try {
@@ -65,6 +75,20 @@ class MessageReceiverService(
                 throw e
             }
         }
+
+        // Update DB if info changed
+        return if (mappedUser.fullname != savedUser.fullname
+            || mappedUser.username != savedUser.username
+        ) {
+            userRepository.save(
+                savedUser.apply {
+                    this.fullname = mappedUser.fullname
+                    this.username = mappedUser.username
+                }
+            )
+        } else {
+            savedUser
+        }
     }
 
     private fun saveOrGetMessage(
@@ -72,14 +96,14 @@ class MessageReceiverService(
         chatId: Long,
         userId: Long
     ): MessageEntity {
-        return try {
-            return txExecutor.new {
-                messageRepository.save(
-                    messageMapper.map(message).apply {
-                        this.chatId = chatId
-                        this.userId = userId
-                    }
-                )
+        val mappedMessage = messageMapper.map(message).apply {
+            this.chatId = chatId
+            this.userId = userId
+        }
+
+        val savedMessage = try {
+            txExecutor.new {
+                messageRepository.save(mappedMessage)
             }
         } catch (e: DbActionExecutionException) {
             try {
@@ -92,8 +116,20 @@ class MessageReceiverService(
                 throw e
             }
         }
+
+        // Update DB if info changed
+        return if (savedMessage.text != mappedMessage.text) {
+            messageRepository.save(
+                savedMessage.apply {
+                    this.text = mappedMessage.text
+                }
+            )
+        } else {
+            savedMessage
+        }
     }
 
+    @Transactional
     fun receive(message: ReceivedMessage) {
         val chat = saveOrGetChat(message.chat, message.frontend)
         val user = saveOrGetUser(message.author, message.frontend)
