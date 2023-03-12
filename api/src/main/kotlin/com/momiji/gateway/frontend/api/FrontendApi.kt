@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 interface FrontendApi {
 
     @RequestMapping(
-        "/messages",
+        "/text-messages",
         method = [RequestMethod.POST],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE]
