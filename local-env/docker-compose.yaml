@@ -30,3 +30,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  s3:
+    image: scality/s3server:latest

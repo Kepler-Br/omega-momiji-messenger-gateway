@@ -8,9 +8,6 @@ plugins {
     kotlin("plugin.spring") version "1.7.22" apply false
 }
 
-
-
-
 subprojects {
     apply(plugin = "io.spring.dependency-management")
     apply(plugin = "org.jetbrains.kotlin.jvm")
