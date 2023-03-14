@@ -9,3 +9,11 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-annotations")
     api("org.springframework.data:spring-data-commons")
 }
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
+}
