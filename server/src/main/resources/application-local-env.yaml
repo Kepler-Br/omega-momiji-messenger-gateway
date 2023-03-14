@@ -8,3 +8,5 @@ momiji:
   frontends:
     telegram:
       url: http://localhost:8090
+  bots:
+    - http://localhost:8081
