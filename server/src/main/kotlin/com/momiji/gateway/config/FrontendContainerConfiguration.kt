@@ -1,10 +1,10 @@
 package com.momiji.gateway.config
 
-import com.momiji.bot.api.ReceiveMessageEventsApi
-import com.momiji.bot.api.model.NewMessageRequest
+import com.momiji.api.bot.api.ReceiveMessageEventsController
+import com.momiji.api.bot.api.model.NewMessageRequest
+import com.momiji.api.frontend.api.FrontendController
 import com.momiji.gateway.config.properties.MomijiConfigurationProperties
 import com.momiji.gateway.frontend.FrontendContainer
-import com.momiji.gateway.frontend.api.FrontendApi
 import feign.Contract
 import feign.Feign
 import feign.codec.Decoder
@@ -15,8 +15,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 
 class BotClientsContainer(
-    private val bots: List<ReceiveMessageEventsApi>
-) : ReceiveMessageEventsApi {
+    private val bots: List<ReceiveMessageEventsController>
+) : ReceiveMessageEventsController {
     override fun newMessage(request: NewMessageRequest) {
         for (bot in bots) {
             // TODO: catch exceptions and log them
@@ -37,7 +37,7 @@ class FrontendContainerConfiguration {
         decoder: Decoder,
         encoder: Encoder,
     ): FrontendContainer {
-        val clients = HashMap<String, FrontendApi>()
+        val clients = HashMap<String, FrontendController>()
 
         for (frontend in config.frontends) {
             clients[frontend.key] =
@@ -45,7 +45,7 @@ class FrontendContainerConfiguration {
                     .encoder(encoder)
                     .decoder(decoder)
                     .contract(contract)
-                    .target(FrontendApi::class.java, frontend.value.url)
+                    .target(FrontendController::class.java, frontend.value.url)
         }
 
         return FrontendContainer(clients)
@@ -57,13 +57,13 @@ class FrontendContainerConfiguration {
         contract: Contract,
         decoder: Decoder,
         encoder: Encoder,
-    ): ReceiveMessageEventsApi {
+    ): ReceiveMessageEventsController {
         val clients = config.bots.map {
             Feign.builder()
                 .encoder(encoder)
                 .decoder(decoder)
                 .contract(contract)
-                .target(ReceiveMessageEventsApi::class.java, it)
+                .target(ReceiveMessageEventsController::class.java, it)
         }
 
         return BotClientsContainer(clients)

@@ -1,7 +1,7 @@
 package com.momiji.gateway.controller
 
-import com.momiji.gateway.inbound.api.GatewayMessageReceiverController
-import com.momiji.gateway.inbound.api.model.ReceivedMessage
+import com.momiji.api.gateway.inbound.api.GatewayMessageReceiverController
+import com.momiji.api.gateway.inbound.api.model.ReceivedMessage
 import com.momiji.gateway.service.MessageReceiverService
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.RequestBody

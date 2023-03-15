@@ -1,11 +1,11 @@
 package com.momiji.gateway.controller
 
-import com.momiji.gateway.common.api.model.SendMessageRequest
-import com.momiji.gateway.common.api.model.SendMessageResponse
+import com.momiji.api.common.api.model.SendMessageRequest
+import com.momiji.api.common.api.model.SendMessageResponse
+import com.momiji.api.gateway.outbound.api.GatewayMessageSenderController
+import com.momiji.api.gateway.outbound.api.model.FrontendNamesResponse
+import com.momiji.api.gateway.outbound.api.model.SendTextMessageRequest
 import com.momiji.gateway.frontend.FrontendContainer
-import com.momiji.gateway.outbound.api.GatewayMessageSenderController
-import com.momiji.gateway.outbound.api.model.FrontendNamesResponse
-import com.momiji.gateway.outbound.api.model.SendTextMessageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping

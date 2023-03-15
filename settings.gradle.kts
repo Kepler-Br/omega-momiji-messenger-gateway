@@ -1,6 +1,6 @@
 rootProject.name = "omega-momiji-messenger-gateway"
 
-include("api")
+//include("api")
 include("server")
 
-findProject(":api")?.name = "${rootProject.name}-api"
+//findProject(":api")?.name = "${rootProject.name}-api"

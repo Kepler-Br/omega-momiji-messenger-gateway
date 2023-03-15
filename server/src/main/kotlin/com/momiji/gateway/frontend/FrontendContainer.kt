@@ -1,15 +1,15 @@
 package com.momiji.gateway.frontend
 
-import com.momiji.gateway.common.api.model.SendMessageRequest
-import com.momiji.gateway.common.api.model.SendMessageResponse
-import com.momiji.gateway.frontend.api.FrontendApi
+import com.momiji.api.common.api.model.SendMessageRequest
+import com.momiji.api.common.api.model.SendMessageResponse
+import com.momiji.api.frontend.api.FrontendController
 import com.momiji.gateway.frontend.exception.FrontendNotFoundException
 
 
 class FrontendContainer(
-    private val clients: HashMap<String, FrontendApi>,
+    private val clients: HashMap<String, FrontendController>,
 ) {
-    private fun getFrontend(frontend: String): FrontendApi {
+    private fun getFrontend(frontend: String): FrontendController {
         if (frontend !in clients) {
             throw FrontendNotFoundException(frontend)
         }
