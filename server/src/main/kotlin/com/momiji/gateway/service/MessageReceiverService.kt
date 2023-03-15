@@ -1,5 +1,7 @@
 package com.momiji.gateway.service
 
+import com.momiji.bot.api.ReceiveMessageEventsApi
+import com.momiji.bot.api.model.NewMessageRequest
 import com.momiji.gateway.inbound.api.model.ReceivedChat
 import com.momiji.gateway.inbound.api.model.ReceivedMessage
 import com.momiji.gateway.inbound.api.model.ReceivedUser
@@ -10,11 +12,9 @@ import com.momiji.gateway.repository.ChatRepository
 import com.momiji.gateway.repository.MessageRepository
 import com.momiji.gateway.repository.TxExecutor
 import com.momiji.gateway.repository.UserRepository
-import com.momiji.gateway.repository.entity.MessageEntity
 import com.momiji.gateway.repository.entity.UserEntity
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import com.momiji.gateway.repository.entity.ChatEntity as ChatModel
 
 @Service
@@ -26,6 +26,7 @@ class MessageReceiverService(
     private val userMapper: UserMapper,
     private val messageMapper: MessageMapper,
     private val txExecutor: TxExecutor,
+    private val receiveMessageEventsApi: ReceiveMessageEventsApi,
 ) {
 
     private fun saveOrGetChat(chat: ReceivedChat, messengerFrontend: String): ChatModel {
@@ -91,11 +92,15 @@ class MessageReceiverService(
         }
     }
 
-    private fun saveOrGetMessage(
+    /**
+     *
+     * @return true if message was updated, false otherwise
+     */
+    private fun updateOrSaveNewMessage(
         message: ReceivedMessage,
         chatId: Long,
         userId: Long
-    ): MessageEntity {
+    ): Boolean {
         val mappedMessage = messageMapper.map(message).apply {
             this.chatId = chatId
             this.userId = userId
@@ -124,15 +129,34 @@ class MessageReceiverService(
                     this.text = mappedMessage.text
                 }
             )
+
+            true
         } else {
-            savedMessage
+            false
         }
     }
 
-    @Transactional
-    fun receive(message: ReceivedMessage) {
+    /**
+     *
+     * @return true if message was updated, false otherwise
+     */
+    private fun saveMessage(message: ReceivedMessage): Boolean {
         val chat = saveOrGetChat(message.chat, message.frontend)
         val user = saveOrGetUser(message.author, message.frontend)
-        saveOrGetMessage(message = message, chatId = chat.id!!, userId = user.id!!)
+
+        return updateOrSaveNewMessage(message = message, chatId = chat.id!!, userId = user.id!!)
+    }
+
+    fun receive(message: ReceivedMessage) {
+        val messageWasUpdated = txExecutor.new { saveMessage(message) }
+
+        val request = NewMessageRequest(
+            frontend = message.frontend,
+            chatId = message.chat.id,
+            messageId = message.id,
+            isUpdated = messageWasUpdated,
+        )
+
+        receiveMessageEventsApi.newMessage(request)
     }
 }

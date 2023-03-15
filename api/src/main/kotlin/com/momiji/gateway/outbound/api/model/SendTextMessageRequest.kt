@@ -12,5 +12,5 @@ data class SendTextMessageRequest(
     val chatId: String,
     // Should be a native message id
     @JsonProperty("reply_to_message_id")
-    val replyToMessageId: String?,
+    val replyToMessageId: String? = null,
 )

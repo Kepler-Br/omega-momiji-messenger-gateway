@@ -1,6 +1,7 @@
 package com.momiji.gateway.config
 
 import com.momiji.bot.api.ReceiveMessageEventsApi
+import com.momiji.bot.api.model.NewMessageRequest
 import com.momiji.gateway.config.properties.MomijiConfigurationProperties
 import com.momiji.gateway.frontend.FrontendContainer
 import com.momiji.gateway.frontend.api.FrontendApi
@@ -15,9 +16,12 @@ import org.springframework.context.annotation.Import
 
 class BotClientsContainer(
     private val bots: List<ReceiveMessageEventsApi>
-) {
-    fun getBots(): List<ReceiveMessageEventsApi> {
-        return bots
+) : ReceiveMessageEventsApi {
+    override fun newMessage(request: NewMessageRequest) {
+        for (bot in bots) {
+            // TODO: catch exceptions and log them
+            bot.newMessage(request)
+        }
     }
 }
 
@@ -36,8 +40,12 @@ class FrontendContainerConfiguration {
         val clients = HashMap<String, FrontendApi>()
 
         for (frontend in config.frontends) {
-            clients[frontend.key] = Feign.builder().encoder(encoder).decoder(decoder).contract(contract)
-                .target(FrontendApi::class.java, frontend.value.url)
+            clients[frontend.key] =
+                Feign.builder()
+                    .encoder(encoder)
+                    .decoder(decoder)
+                    .contract(contract)
+                    .target(FrontendApi::class.java, frontend.value.url)
         }
 
         return FrontendContainer(clients)
@@ -49,7 +57,7 @@ class FrontendContainerConfiguration {
         contract: Contract,
         decoder: Decoder,
         encoder: Encoder,
-    ): BotClientsContainer {
+    ): ReceiveMessageEventsApi {
         val clients = config.bots.map {
             Feign.builder()
                 .encoder(encoder)
