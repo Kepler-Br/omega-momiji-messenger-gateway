@@ -1,10 +1,10 @@
 package com.momiji.gateway.service
 
-import com.momiji.api.bot.api.ReceiveMessageEventsController
-import com.momiji.api.bot.api.model.NewMessageRequest
-import com.momiji.api.gateway.inbound.api.model.ReceivedChat
-import com.momiji.api.gateway.inbound.api.model.ReceivedMessage
-import com.momiji.api.gateway.inbound.api.model.ReceivedUser
+import com.momiji.api.bot.BotReceiveMessageController
+import com.momiji.api.bot.model.NewMessageRequest
+import com.momiji.api.gateway.inbound.model.ReceivedChat
+import com.momiji.api.gateway.inbound.model.ReceivedMessage
+import com.momiji.api.gateway.inbound.model.ReceivedUser
 import com.momiji.gateway.mapper.ChatMapper
 import com.momiji.gateway.mapper.MessageMapper
 import com.momiji.gateway.mapper.UserMapper
@@ -26,7 +26,7 @@ class MessageReceiverService(
     private val userMapper: UserMapper,
     private val messageMapper: MessageMapper,
     private val txExecutor: TxExecutor,
-    private val receiveMessageEventsController: ReceiveMessageEventsController,
+    private val botReceiveMessageController: BotReceiveMessageController,
 ) {
 
     private fun saveOrGetChat(chat: ReceivedChat, messengerFrontend: String): ChatModel {
@@ -157,6 +157,6 @@ class MessageReceiverService(
             isUpdated = messageWasUpdated,
         )
 
-        receiveMessageEventsController.newMessage(request)
+        botReceiveMessageController.newMessage(request)
     }
 }

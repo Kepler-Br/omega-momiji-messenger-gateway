@@ -1,6 +1,6 @@
 package com.momiji.gateway.mapper
 
-import com.momiji.api.gateway.inbound.api.model.ReceivedUser
+import com.momiji.api.gateway.inbound.model.ReceivedUser
 import com.momiji.gateway.repository.entity.UserEntity
 import org.springframework.stereotype.Component
 

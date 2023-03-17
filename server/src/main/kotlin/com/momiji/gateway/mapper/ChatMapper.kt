@@ -1,9 +1,9 @@
 package com.momiji.gateway.mapper
 
-import com.momiji.api.gateway.inbound.api.model.ReceivedChat
+import com.momiji.api.gateway.inbound.model.ReceivedChat
 import com.momiji.gateway.repository.entity.ChatEntity
 import org.springframework.stereotype.Component
-import com.momiji.api.gateway.inbound.api.model.enumerator.ChatType as ApiChatType
+import com.momiji.api.gateway.inbound.model.enumerator.ChatType as ApiChatType
 import com.momiji.gateway.repository.entity.enumerator.ChatType as EntityChatType
 
 @Component

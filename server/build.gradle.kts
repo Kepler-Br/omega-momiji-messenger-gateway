@@ -12,7 +12,7 @@ dependencies {
     implementation("org.postgresql:postgresql")
     implementation(kotlin("stdlib-jdk8"))
 
-    val apiVersion: String by project
-
-    implementation("com.momiji.api:omega-momiji-api:$apiVersion")
+    implementation("com.momiji.api:omega-momiji-api")
+    implementation("com.momiji.api:frontend-client-list-starter")
+    implementation("com.momiji.api:bot-client-list-starter")
 }

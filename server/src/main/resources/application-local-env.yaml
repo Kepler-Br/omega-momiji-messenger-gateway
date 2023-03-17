@@ -8,8 +8,17 @@ spring:
     url: jdbc:postgresql://localhost:5429/gateway
 
 momiji:
-  frontends:
-    telegram:
-      url: http://localhost:8090
-  bots:
-    - http://localhost:8081
+  clients:
+    bots:
+      stub: true
+      urls:
+        - http://localhost:8081
+    frontends:
+      enabled: true
+      stub: false
+      urls:
+        telegram: http://localhost:8090
+
+logging:
+  level:
+    com.momiji.api: debug
