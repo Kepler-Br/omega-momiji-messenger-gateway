@@ -13,6 +13,7 @@ import com.momiji.gateway.repository.MessageRepository
 import com.momiji.gateway.repository.TxExecutor
 import com.momiji.gateway.repository.UserRepository
 import com.momiji.gateway.repository.entity.UserEntity
+import java.time.LocalDateTime
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Service
 import com.momiji.gateway.repository.entity.ChatEntity as ChatModel
@@ -30,7 +31,8 @@ class MessageReceiverService(
 ) {
 
     private fun saveOrGetChat(chat: ReceivedChat, messengerFrontend: String): ChatModel {
-        val mappedChat = chatMapper.map(chat, messengerFrontend)
+        val mappedChat =
+            chatMapper.map(chat, messengerFrontend).apply { createdAt = LocalDateTime.now() }
 
         val savedChat = try {
             txExecutor.new {
@@ -59,7 +61,8 @@ class MessageReceiverService(
     }
 
     private fun saveOrGetUser(user: ReceivedUser, messengerFrontend: String): UserEntity {
-        val mappedUser = userMapper.map(user, messengerFrontend)
+        val mappedUser =
+            userMapper.map(user, messengerFrontend).apply { createdAt = LocalDateTime.now() }
 
         val savedUser = try {
             txExecutor.new {
@@ -104,6 +107,7 @@ class MessageReceiverService(
         val mappedMessage = messageMapper.map(message).apply {
             this.chatId = chatId
             this.userId = userId
+            this.createdAt = LocalDateTime.now()
         }
 
         val savedMessage = try {

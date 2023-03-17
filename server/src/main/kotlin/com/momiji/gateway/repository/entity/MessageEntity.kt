@@ -1,6 +1,7 @@
 package com.momiji.gateway.repository.entity
 
 import com.momiji.gateway.repository.entity.enumerator.MediaType
+import java.time.LocalDateTime
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 
@@ -14,6 +15,7 @@ data class MessageEntity(
     var mediaType: MediaType? = null,
     var chatId: Long? = null,
     var userId: Long? = null,
+    var createdAt: LocalDateTime? = null,
     var frontend: String,
     var nativeId: String,
 )
