@@ -10,7 +10,7 @@ spring:
 momiji:
   clients:
     bots:
-      stub: true
+      stub: false
       urls:
         - http://localhost:8081
     frontends:
