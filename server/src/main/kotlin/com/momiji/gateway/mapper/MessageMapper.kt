@@ -28,6 +28,7 @@ class MessageMapper {
             nativeId = value.id,
             text = value.text,
             mediaType = map(value.mediaType),
+            replyToMessageNativeId = value.replyTo,
         )
     }
 }
