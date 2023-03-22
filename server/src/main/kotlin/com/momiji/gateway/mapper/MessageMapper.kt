@@ -2,9 +2,9 @@ package com.momiji.gateway.mapper
 
 import com.momiji.api.gateway.inbound.model.ReceivedMessage
 import com.momiji.api.gateway.inbound.model.enumerator.MediaType
-import com.momiji.gateway.repository.entity.enumerator.MediaType as EntityMediaType
 import com.momiji.gateway.repository.entity.MessageEntity
 import org.springframework.stereotype.Component
+import com.momiji.gateway.repository.entity.enumerator.MediaType as EntityMediaType
 
 @Component
 class MessageMapper {

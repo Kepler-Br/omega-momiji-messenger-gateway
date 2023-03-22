@@ -13,10 +13,16 @@ import com.momiji.gateway.repository.MessageRepository
 import com.momiji.gateway.repository.TxExecutor
 import com.momiji.gateway.repository.UserRepository
 import com.momiji.gateway.repository.entity.UserEntity
+import io.micrometer.observation.Observation
+import io.micrometer.observation.ObservationRegistry
 import java.time.LocalDateTime
+import java.util.concurrent.Executors
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Service
 import com.momiji.gateway.repository.entity.ChatEntity as ChatModel
+
 
 @Service
 class MessageReceiverService(
@@ -28,7 +34,11 @@ class MessageReceiverService(
     private val messageMapper: MessageMapper,
     private val txExecutor: TxExecutor,
     private val botReceiveMessageController: BotReceiveMessageController,
+    private val observationRegistry: ObservationRegistry,
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val threadExecutor = Executors.newFixedThreadPool(2)
+
 
     private fun saveOrGetChat(chat: ReceivedChat, messengerFrontend: String): ChatModel {
         val mappedChat =
@@ -161,6 +171,21 @@ class MessageReceiverService(
             isUpdated = messageWasUpdated,
         )
 
-        botReceiveMessageController.newMessage(request)
+        threadExecutor.submit {
+            // TODO: TraceID and SpanID are not passed with feign client calls
+            val observation = Observation.createNotStarted("newMessage", observationRegistry)
+
+            observation.observe {
+                try {
+                    botReceiveMessageController.newMessage(request)
+                } catch (ex: RuntimeException) {
+                    logger.error(
+                        "Exception has occurred during sending message in thread executor",
+                        ex
+                    )
+                }
+            }
+
+        }
     }
 }
