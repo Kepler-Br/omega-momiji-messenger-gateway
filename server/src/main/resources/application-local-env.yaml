@@ -15,7 +15,7 @@ momiji:
         - http://localhost:8093
     frontends:
       enabled: true
-      stub: true
+      stub: false
       urls:
         telegram: http://localhost:8094
 

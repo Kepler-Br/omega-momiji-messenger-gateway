@@ -14,6 +14,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.lang.RuntimeException
 
 @RequestMapping(
     path = ["outbound"],
@@ -27,15 +28,23 @@ class DefaultGatewayMessageSenderController(
 
     override fun sendText(@RequestBody request: SendTextMessageRequest): SendMessageResponse {
         logger.debug("Sending text message: $request")
+        try {
+            return frontendContainer.sendTextMessage(
+                body = SendMessageRequest(
+                    text = request.text,
+                    replyTo = request.replyToMessageId,
+                    chatId = request.chatId,
+                ),
+                frontend = request.frontend,
+            )
+        } catch (ex: RuntimeException) {
+            logger.error("An exception has occurred!", ex)
 
-        return frontendContainer.sendTextMessage(
-            body = SendMessageRequest(
-                text = request.text,
-                replyTo = request.replyToMessageId,
-                chatId = request.chatId,
-            ),
-            frontend = request.frontend,
-        )
+            return SendMessageResponse(
+                errorMessage = ex.toString(),
+                messageId = null,
+            )
+        }
     }
 
     override fun sendTypingAction(frontend: String, chatId: String): BasicResponse {
