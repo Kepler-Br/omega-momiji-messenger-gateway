@@ -13,8 +13,6 @@ import com.momiji.gateway.repository.MessageRepository
 import com.momiji.gateway.repository.TxExecutor
 import com.momiji.gateway.repository.UserRepository
 import com.momiji.gateway.repository.entity.UserEntity
-import io.micrometer.observation.Observation
-import io.micrometer.observation.ObservationRegistry
 import java.time.LocalDateTime
 import java.util.concurrent.Executors
 import org.slf4j.Logger
@@ -34,7 +32,6 @@ class MessageReceiverService(
     private val messageMapper: MessageMapper,
     private val txExecutor: TxExecutor,
     private val botReceiveMessageController: BotReceiveMessageController,
-    private val observationRegistry: ObservationRegistry,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
     private val threadExecutor = Executors.newFixedThreadPool(2)
@@ -172,20 +169,14 @@ class MessageReceiverService(
         )
 
         threadExecutor.submit {
-            // TODO: TraceID and SpanID are not passed with feign client calls
-            val observation = Observation.createNotStarted("newMessage", observationRegistry)
-
-            observation.observe {
-                try {
-                    botReceiveMessageController.newMessage(request)
-                } catch (ex: RuntimeException) {
-                    logger.error(
-                        "Exception has occurred during sending message in thread executor",
-                        ex
-                    )
-                }
+            try {
+                botReceiveMessageController.newMessage(request)
+            } catch (ex: RuntimeException) {
+                logger.error(
+                    "Exception has occurred during sending message in thread executor",
+                    ex
+                )
             }
-
         }
     }
 }

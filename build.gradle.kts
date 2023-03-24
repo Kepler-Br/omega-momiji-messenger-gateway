@@ -2,10 +2,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
-    id("org.springframework.boot") version "3.0.3"
+    id("org.springframework.boot") version "2.7.10"
     id("io.spring.dependency-management") version "1.1.0"
-    kotlin("jvm") version "1.8.20-RC" apply false
-    kotlin("plugin.spring") version "1.7.22" apply false
+    kotlin("jvm") version "1.7.10" apply false
+    kotlin("plugin.spring") version "1.7.10" apply false
 }
 
 subprojects {
@@ -22,8 +22,11 @@ subprojects {
     dependencyManagement {
         imports {
             val springCloudVersion: String by project
+            val logbookVersion: String by project
 
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}")
+            mavenBom("org.zalando:logbook-bom:$logbookVersion")
+            mavenBom("io.awspring.cloud:spring-cloud-aws-dependencies:2.4.0")
             mavenBom(SpringBootPlugin.BOM_COORDINATES)
         }
 

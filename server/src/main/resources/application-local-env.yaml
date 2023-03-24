@@ -24,3 +24,8 @@ logging:
     com.momiji.api: trace
     com.momiji.gateway.service: trace
     com.momiji.gateway.controller: trace
+
+cloud:
+  aws:
+    s3:
+      endpoint: http://localhost:4566
