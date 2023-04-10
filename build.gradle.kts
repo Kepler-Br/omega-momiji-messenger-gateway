@@ -32,11 +32,16 @@ subprojects {
 
         dependencies {
             val apiVersion: String by project
+            val awssdkVersion: String by project
 
             dependencySet("com.momiji.api:$apiVersion") {
                 entry("omega-momiji-api")
                 entry("frontend-client-list-starter")
                 entry("bot-client-list-starter")
+            }
+            dependencySet("software.amazon.awssdk:$awssdkVersion") {
+                entry("apache-client")
+                entry("s3")
             }
         }
     }

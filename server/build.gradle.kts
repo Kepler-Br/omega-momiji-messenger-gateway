@@ -12,6 +12,8 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.postgresql:postgresql")
+    implementation("software.amazon.awssdk:apache-client")
+    implementation("software.amazon.awssdk:s3")
     implementation("org.zalando:logbook-spring-boot-starter")
     implementation(kotlin("stdlib-jdk8"))
 

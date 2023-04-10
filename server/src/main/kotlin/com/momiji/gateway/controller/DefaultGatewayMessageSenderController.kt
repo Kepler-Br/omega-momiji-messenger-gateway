@@ -1,7 +1,7 @@
 package com.momiji.gateway.controller
 
-import com.momiji.api.common.model.BasicResponse
 import com.momiji.api.common.model.SendMessageResponse
+import com.momiji.api.common.model.SimpleResponse
 import com.momiji.api.gateway.outbound.GatewayMessageSenderController
 import com.momiji.api.gateway.outbound.model.FrontendNamesResponse
 import com.momiji.api.gateway.outbound.model.SendTextMessageRequest
@@ -24,7 +24,7 @@ class DefaultGatewayMessageSenderController(
         return messageSenderService.sendText(request = request)
     }
 
-    override fun sendTypingAction(frontend: String, chatId: String): BasicResponse {
+    override fun sendTypingAction(frontend: String, chatId: String): SimpleResponse {
         return messageSenderService.sendTypingAction(frontend = frontend, chatId = chatId)
     }
 

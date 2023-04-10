@@ -1,9 +1,9 @@
 package com.momiji.gateway.service
 
-import com.momiji.api.common.model.BasicResponse
 import com.momiji.api.common.model.ResponseStatus
 import com.momiji.api.common.model.SendMessageRequest
 import com.momiji.api.common.model.SendMessageResponse
+import com.momiji.api.common.model.SimpleResponse
 import com.momiji.api.frontend.FrontendContainer
 import com.momiji.api.gateway.outbound.model.FrontendNamesResponse
 import com.momiji.api.gateway.outbound.model.SendTextMessageRequest
@@ -84,12 +84,12 @@ class MessageSenderService(
         }
     }
 
-    fun sendTypingAction(frontend: String, chatId: String): BasicResponse {
+    fun sendTypingAction(frontend: String, chatId: String): SimpleResponse {
         logger.debug("Sending typing action to frontend \"$frontend\", chat id \"$chatId\"")
 
         frontendContainer.sendTypingAction(chatId = chatId, frontend = frontend)
 
-        return BasicResponse(
+        return SimpleResponse(
             status = ResponseStatus.OK,
         )
     }
@@ -98,7 +98,8 @@ class MessageSenderService(
         logger.debug("Get frontend names")
 
         return FrontendNamesResponse(
-            frontendContainer.getFrontendNames()
+            names = frontendContainer.getFrontendNames(),
+            status = ResponseStatus.OK
         )
     }
 

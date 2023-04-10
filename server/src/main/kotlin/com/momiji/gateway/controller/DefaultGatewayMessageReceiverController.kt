@@ -1,7 +1,7 @@
 package com.momiji.gateway.controller
 
-import com.momiji.api.common.model.BasicResponse
 import com.momiji.api.common.model.ResponseStatus
+import com.momiji.api.common.model.SimpleResponse
 import com.momiji.api.gateway.inbound.GatewayMessageReceiverController
 import com.momiji.api.gateway.inbound.model.ReceivedMessage
 import com.momiji.gateway.service.MessageReceiverService
@@ -22,12 +22,12 @@ class DefaultGatewayMessageReceiverController(
 ) : GatewayMessageReceiverController {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun receiveMessage(@RequestBody message: ReceivedMessage): BasicResponse {
+    override fun receiveMessage(@RequestBody message: ReceivedMessage): SimpleResponse {
         logger.debug("Incoming message: $message")
 
         messageReceiverService.receive(message)
 
-        return BasicResponse(
+        return SimpleResponse(
             status = ResponseStatus.OK,
         )
     }
