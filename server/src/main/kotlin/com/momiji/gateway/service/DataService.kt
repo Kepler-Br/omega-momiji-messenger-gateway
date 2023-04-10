@@ -1,8 +1,10 @@
 package com.momiji.gateway.service
 
+import com.google.common.hash.Hashing
 import com.momiji.api.gateway.inbound.model.ReceivedChat
 import com.momiji.api.gateway.inbound.model.ReceivedMessage
 import com.momiji.api.gateway.inbound.model.ReceivedUser
+import com.momiji.api.gateway.inbound.model.enumerator.MediaType
 import com.momiji.gateway.mapper.ChatMapper
 import com.momiji.gateway.mapper.MessageMapper
 import com.momiji.gateway.mapper.UserMapper
@@ -15,8 +17,12 @@ import com.momiji.gateway.repository.entity.MessageEntity
 import com.momiji.gateway.repository.entity.UserEntity
 import com.momiji.gateway.repository.entity.enumerator.ChatType
 import java.time.LocalDateTime
+import java.util.Base64
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Service
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
 
 @Service
 class DataService(
@@ -27,17 +33,18 @@ class DataService(
     private val userMapper: UserMapper,
     private val messageMapper: MessageMapper,
     private val txExecutor: TxExecutor,
+    private val s3Client: S3Client,
 ) {
 
 
-    fun createOrUpdateChat(chat: ReceivedChat, frontendName: String): ChatEntity {
+    private fun createOrUpdateChat(chat: ReceivedChat, frontendName: String): ChatEntity {
         val mappedChat =
             chatMapper.map(chat, frontendName).apply { createdAt = LocalDateTime.now() }
 
         return createOrUpdateChat(mappedChat, frontendName)
     }
 
-    fun createOrUpdateChat(chat: ChatEntity, frontendName: String): ChatEntity {
+    private fun createOrUpdateChat(chat: ChatEntity, frontendName: String): ChatEntity {
         val savedChat = try {
             txExecutor.new {
                 chatRepository.save(chat)
@@ -64,7 +71,7 @@ class DataService(
         }
     }
 
-    fun createOrUpdateUser(user: ReceivedUser, frontendName: String): UserEntity {
+    private fun createOrUpdateUser(user: ReceivedUser, frontendName: String): UserEntity {
         val mappedUser =
             userMapper.map(user, frontendName).apply { createdAt = LocalDateTime.now() }
 
@@ -132,15 +139,17 @@ class DataService(
      *
      * @return true if message was updated, false otherwise
      */
-    fun updateOrSaveNewMessage(
+    private fun updateOrSaveNewMessage(
         message: ReceivedMessage,
         chatId: Long,
-        userId: Long
+        userId: Long,
+        mediaLink: String?,
     ): Boolean {
         val mappedMessage = messageMapper.map(message).apply {
             this.chatId = chatId
             this.userId = userId
             this.createdAt = LocalDateTime.now()
+            this.mediaLink = mediaLink
         }
 
         return updateOrSaveNewMessage(message = mappedMessage)
@@ -183,6 +192,43 @@ class DataService(
         }
     }
 
+    private fun bucketNameFromMediaType(mediaType: MediaType): String {
+        return when (mediaType) {
+            MediaType.AUDIO,
+            MediaType.VOICE -> "audio"
+
+            MediaType.STICKER,
+            MediaType.PHOTO -> "image"
+
+            MediaType.VIDEO,
+            MediaType.GIF,
+            MediaType.VIDEO_NOTE -> "video"
+        }
+    }
+
+    private fun saveMedia(message: ReceivedMessage): String? {
+        if (message.mediaBytes == null || message.mediaType == null) {
+            return null
+        }
+
+        val decoded = Base64.getDecoder().decode(message.mediaBytes)
+
+        val hashHex = Hashing.sha256()
+            .hashBytes(decoded)
+            .toString()
+
+        val bucket = bucketNameFromMediaType(message.mediaType!!)
+
+        s3Client.putObject(
+            PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(hashHex)
+                .build(),
+            RequestBody.fromBytes(decoded)
+        )
+
+        return "$bucket/$hashHex"
+    }
 
     /**
      *
@@ -192,6 +238,11 @@ class DataService(
         val chat = createOrUpdateChat(message.chat, message.frontend)
         val user = createOrUpdateUser(message.author, message.frontend)
 
-        return updateOrSaveNewMessage(message = message, chatId = chat.id!!, userId = user.id!!)
+        return updateOrSaveNewMessage(
+            message = message,
+            chatId = chat.id!!,
+            userId = user.id!!,
+            mediaLink = saveMedia(message),
+        )
     }
 }

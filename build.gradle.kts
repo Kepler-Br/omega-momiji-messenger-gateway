@@ -34,6 +34,9 @@ subprojects {
             val apiVersion: String by project
             val awssdkVersion: String by project
 
+
+            dependency("com.google.guava:guava:31.1-jre")
+
             dependencySet("com.momiji.api:$apiVersion") {
                 entry("omega-momiji-api")
                 entry("frontend-client-list-starter")
