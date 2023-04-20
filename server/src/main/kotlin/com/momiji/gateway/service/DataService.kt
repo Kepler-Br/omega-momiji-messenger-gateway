@@ -16,7 +16,6 @@ import com.momiji.gateway.repository.entity.ChatEntity
 import com.momiji.gateway.repository.entity.MessageEntity
 import com.momiji.gateway.repository.entity.UserEntity
 import com.momiji.gateway.repository.entity.enumerator.ChatType
-import java.time.LocalDateTime
 import java.util.Base64
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Service
@@ -39,7 +38,7 @@ class DataService(
 
     private fun createOrUpdateChat(chat: ReceivedChat, frontendName: String): ChatEntity {
         val mappedChat =
-            chatMapper.map(chat, frontendName).apply { createdAt = LocalDateTime.now() }
+            chatMapper.map(chat, frontendName)
 
         return createOrUpdateChat(mappedChat, frontendName)
     }
@@ -73,7 +72,7 @@ class DataService(
 
     private fun createOrUpdateUser(user: ReceivedUser, frontendName: String): UserEntity {
         val mappedUser =
-            userMapper.map(user, frontendName).apply { createdAt = LocalDateTime.now() }
+            userMapper.map(user, frontendName)
 
         return createOrUpdateUser(mappedUser)
     }
@@ -148,7 +147,6 @@ class DataService(
         val mappedMessage = messageMapper.map(message).apply {
             this.chatId = chatId
             this.userId = userId
-            this.createdAt = LocalDateTime.now()
             this.mediaLink = mediaLink
         }
 

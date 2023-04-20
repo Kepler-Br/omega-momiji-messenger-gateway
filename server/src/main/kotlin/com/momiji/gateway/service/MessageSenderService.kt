@@ -1,5 +1,6 @@
 package com.momiji.gateway.service
 
+import com.momiji.api.common.model.ChatAdminsResponse
 import com.momiji.api.common.model.ResponseStatus
 import com.momiji.api.common.model.SendMessageRequest
 import com.momiji.api.common.model.SendMessageResponse
@@ -92,6 +93,10 @@ class MessageSenderService(
         return SimpleResponse(
             status = ResponseStatus.OK,
         )
+    }
+
+    fun getChatAdmins(frontend: String, chatId: String): ChatAdminsResponse {
+        return frontendContainer.getFrontend(frontend).getChatAdmins(chatId)
     }
 
     fun getFrontendNames(): FrontendNamesResponse {

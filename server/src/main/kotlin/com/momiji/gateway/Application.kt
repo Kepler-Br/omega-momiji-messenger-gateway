@@ -10,6 +10,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients
 @ConfigurationPropertiesScan
 class Application
 
+// TODO: add https://stackoverflow.com/questions/19819837/java-executor-with-throttling-throughput-control to all calls to frontends
 fun main(args: Array<String>) {
     runApplication<Application>(*args)
 }

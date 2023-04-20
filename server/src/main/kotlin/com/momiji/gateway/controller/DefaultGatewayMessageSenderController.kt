@@ -1,5 +1,6 @@
 package com.momiji.gateway.controller
 
+import com.momiji.api.common.model.ChatAdminsResponse
 import com.momiji.api.common.model.SendMessageResponse
 import com.momiji.api.common.model.SimpleResponse
 import com.momiji.api.gateway.outbound.GatewayMessageSenderController
@@ -26,6 +27,10 @@ class DefaultGatewayMessageSenderController(
 
     override fun sendTypingAction(frontend: String, chatId: String): SimpleResponse {
         return messageSenderService.sendTypingAction(frontend = frontend, chatId = chatId)
+    }
+
+    override fun getChatAdmins(chatId: String, frontend: String): ChatAdminsResponse {
+        return messageSenderService.getChatAdmins(chatId=chatId, frontend=frontend)
     }
 
     override fun getFrontendNames(): FrontendNamesResponse {

@@ -25,15 +25,10 @@ logging:
     com.momiji.gateway.service: trace
     com.momiji.gateway.controller: trace
 
-cloud:
-  aws:
-    s3:
-      endpoint: http://localhost:4566
-
 s3:
   region: us-east-1
   host: localhost
-  port: 8000
+  port: 9000
   path: /
   scheme: http
   access-key-id: accessKey1
