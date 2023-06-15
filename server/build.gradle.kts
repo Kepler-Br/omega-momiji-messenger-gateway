@@ -21,4 +21,6 @@ dependencies {
     implementation("com.momiji.api:bot-client-list-starter")
     implementation("com.momiji.api:frontend-client-list-starter")
     implementation("com.momiji.api:omega-momiji-api")
+
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }
