@@ -3,7 +3,7 @@ package com.momiji.gateway.controller
 import com.momiji.api.common.model.ChatAdminsResponse
 import com.momiji.api.common.model.SendMessageResponse
 import com.momiji.api.common.model.SimpleResponse
-import com.momiji.api.gateway.outbound.GatewayMessageSenderController
+import com.momiji.api.gateway.outbound.GatewayMessageSenderClient
 import com.momiji.api.gateway.outbound.model.FrontendNamesResponse
 import com.momiji.api.gateway.outbound.model.SendTextMessageRequest
 import com.momiji.gateway.service.MessageSenderService
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController("outbound")
 class DefaultGatewayMessageSenderController(
     private val messageSenderService: MessageSenderService,
-) : GatewayMessageSenderController {
+) : GatewayMessageSenderClient {
 
     override fun sendText(@RequestBody request: SendTextMessageRequest): SendMessageResponse {
         return messageSenderService.sendText(request = request)
@@ -30,7 +30,7 @@ class DefaultGatewayMessageSenderController(
     }
 
     override fun getChatAdmins(chatId: String, frontend: String): ChatAdminsResponse {
-        return messageSenderService.getChatAdmins(chatId=chatId, frontend=frontend)
+        return messageSenderService.getChatAdmins(chatId = chatId, frontend = frontend)
     }
 
     override fun getFrontendNames(): FrontendNamesResponse {

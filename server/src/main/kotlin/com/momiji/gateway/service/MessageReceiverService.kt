@@ -1,6 +1,6 @@
 package com.momiji.gateway.service
 
-import com.momiji.api.bot.BotReceiveMessageController
+import com.momiji.api.bot.BotReceiveMessageClient
 import com.momiji.api.bot.model.NewMessageRequest
 import com.momiji.api.gateway.inbound.model.ReceivedMessage
 import com.momiji.gateway.repository.TxExecutor
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 class MessageReceiverService(
     private val txExecutor: TxExecutor,
     private val dataService: DataService,
-    private val botReceiveMessageController: BotReceiveMessageController,
+    private val botReceiveMessageClient: BotReceiveMessageClient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
     private val threadExecutor = Executors.newFixedThreadPool(2)
@@ -32,7 +32,7 @@ class MessageReceiverService(
 
         threadExecutor.submit {
             try {
-                botReceiveMessageController.newMessage(request)
+                botReceiveMessageClient.newMessage(request)
             } catch (ex: RuntimeException) {
                 logger.error(
                     "Exception has occurred during sending message in thread executor",

@@ -34,7 +34,7 @@ class MessageSenderService(
 
 
     fun sendText(request: SendTextMessageRequest): SendMessageResponse {
-        logger.debug("Sending text message: $request")
+        logger.debug("Sending text message: {}", request)
         try {
             val sentMessage = frontendContainer.sendTextMessage(
                 body = SendMessageRequest(

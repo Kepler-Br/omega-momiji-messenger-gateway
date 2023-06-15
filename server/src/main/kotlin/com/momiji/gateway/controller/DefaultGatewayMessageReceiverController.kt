@@ -2,7 +2,7 @@ package com.momiji.gateway.controller
 
 import com.momiji.api.common.model.ResponseStatus
 import com.momiji.api.common.model.SimpleResponse
-import com.momiji.api.gateway.inbound.GatewayMessageReceiverController
+import com.momiji.api.gateway.inbound.GatewayMessageReceiverClient
 import com.momiji.api.gateway.inbound.model.ReceivedMessage
 import com.momiji.gateway.service.MessageReceiverService
 import org.slf4j.Logger
@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class DefaultGatewayMessageReceiverController(
     private val messageReceiverService: MessageReceiverService,
-) : GatewayMessageReceiverController {
+) : GatewayMessageReceiverClient {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun receiveMessage(@RequestBody message: ReceivedMessage): SimpleResponse {
-        logger.debug("Incoming message: $message")
+        logger.debug("Incoming message: {}", message)
 
         messageReceiverService.receive(message)
 
