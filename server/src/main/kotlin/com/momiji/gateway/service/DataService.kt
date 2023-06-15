@@ -142,12 +142,14 @@ class DataService(
         message: ReceivedMessage,
         chatId: Long,
         userId: Long,
-        mediaLink: String?,
+        s3Bucket: String?,
+        s3Key: String?,
     ): Boolean {
         val mappedMessage = messageMapper.map(message).apply {
             this.chatId = chatId
             this.userId = userId
-            this.mediaLink = mediaLink
+            this.s3Bucket = s3Bucket
+            this.s3Key = s3Key
         }
 
         return updateOrSaveNewMessage(message = mappedMessage)
@@ -204,7 +206,7 @@ class DataService(
         }
     }
 
-    private fun saveMedia(message: ReceivedMessage): String? {
+    private fun saveMedia(message: ReceivedMessage): Pair<String, String>? {
         if (message.mediaBytes == null || message.mediaType == null) {
             return null
         }
@@ -225,7 +227,7 @@ class DataService(
             RequestBody.fromBytes(decoded)
         )
 
-        return "$bucket/$hashHex"
+        return Pair(bucket, hashHex)
     }
 
     /**
@@ -235,12 +237,14 @@ class DataService(
     fun saveMessage(message: ReceivedMessage): Boolean {
         val chat = createOrUpdateChat(message.chat, message.frontend)
         val user = createOrUpdateUser(message.author, message.frontend)
+        val mediaLink = saveMedia(message)
 
         return updateOrSaveNewMessage(
             message = message,
             chatId = chat.id!!,
             userId = user.id!!,
-            mediaLink = saveMedia(message),
+            s3Bucket = mediaLink?.first,
+            s3Key = mediaLink?.second,
         )
     }
 }

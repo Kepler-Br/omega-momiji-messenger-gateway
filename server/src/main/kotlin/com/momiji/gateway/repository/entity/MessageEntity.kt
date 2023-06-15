@@ -14,7 +14,8 @@ data class MessageEntity(
     @Id
     var id: Long? = null,
     var text: String? = null,
-    var mediaLink: String? = null,
+    var s3Bucket: String? = null,
+    var s3Key: String? = null,
     var mediaType: MediaType? = null,
     var chatId: Long? = null,
     var userId: Long? = null,
