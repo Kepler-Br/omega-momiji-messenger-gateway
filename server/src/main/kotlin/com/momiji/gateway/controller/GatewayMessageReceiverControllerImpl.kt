@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
     produces = [MediaType.APPLICATION_JSON_VALUE]
 )
 @RestController
-class DefaultGatewayMessageReceiverController(
+class GatewayMessageReceiverControllerImpl(
     private val messageReceiverService: MessageReceiverService,
 ) : GatewayMessageReceiverClient {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)

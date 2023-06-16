@@ -1,10 +1,11 @@
 package com.momiji.gateway.controller
 
-import com.momiji.api.common.model.ChatAdminsResponse
-import com.momiji.api.common.model.SendMessageResponse
+import com.momiji.api.frontend.model.ChatAdminsFrontendResponse
+import com.momiji.api.frontend.model.SendMessageFrontendResponse
 import com.momiji.api.common.model.SimpleResponse
 import com.momiji.api.gateway.outbound.GatewayMessageSenderClient
 import com.momiji.api.gateway.outbound.model.FrontendNamesResponse
+import com.momiji.api.gateway.outbound.model.SendBinaryMessageGatewayRequest
 import com.momiji.api.gateway.outbound.model.SendTextMessageRequest
 import com.momiji.gateway.service.MessageSenderService
 import org.springframework.http.MediaType
@@ -17,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController
     produces = [MediaType.APPLICATION_JSON_VALUE]
 )
 @RestController("outbound")
-class DefaultGatewayMessageSenderController(
+class GatewayMessageSenderControllerImpl(
     private val messageSenderService: MessageSenderService,
 ) : GatewayMessageSenderClient {
 
-    override fun sendText(@RequestBody request: SendTextMessageRequest): SendMessageResponse {
+    override fun sendText(@RequestBody request: SendTextMessageRequest): SendMessageFrontendResponse {
         return messageSenderService.sendText(request = request)
     }
 
@@ -29,11 +30,19 @@ class DefaultGatewayMessageSenderController(
         return messageSenderService.sendTypingAction(frontend = frontend, chatId = chatId)
     }
 
-    override fun getChatAdmins(chatId: String, frontend: String): ChatAdminsResponse {
+    override fun sendVoice(request: SendBinaryMessageGatewayRequest): SendMessageFrontendResponse {
+        return messageSenderService.sendVoice(request)
+    }
+
+    override fun getChatAdmins(chatId: String, frontend: String): ChatAdminsFrontendResponse {
         return messageSenderService.getChatAdmins(chatId = chatId, frontend = frontend)
     }
 
     override fun getFrontendNames(): FrontendNamesResponse {
         return messageSenderService.getFrontendNames()
+    }
+
+    override fun sendImage(request: SendBinaryMessageGatewayRequest): SendMessageFrontendResponse {
+        return messageSenderService.sendImage(request)
     }
 }

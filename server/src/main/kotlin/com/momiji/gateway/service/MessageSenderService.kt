@@ -1,15 +1,16 @@
 package com.momiji.gateway.service
 
-import com.momiji.api.common.model.ChatAdminsResponse
 import com.momiji.api.common.model.ResponseStatus
-import com.momiji.api.common.model.SendMessageRequest
-import com.momiji.api.common.model.SendMessageResponse
 import com.momiji.api.common.model.SimpleResponse
 import com.momiji.api.frontend.FrontendContainer
+import com.momiji.api.frontend.model.ChatAdminsFrontendResponse
+import com.momiji.api.frontend.model.SendMessageFrontendResponse
 import com.momiji.api.gateway.outbound.model.FrontendNamesResponse
+import com.momiji.api.gateway.outbound.model.SendBinaryMessageGatewayRequest
 import com.momiji.api.gateway.outbound.model.SendTextMessageRequest
 import com.momiji.gateway.repository.entity.MessageEntity
 import com.momiji.gateway.repository.entity.UserEntity
+import com.momiji.gateway.repository.entity.enumerator.MediaType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -32,25 +33,120 @@ class MessageSenderService(
         )
     }
 
+    fun sendVoice(request: SendBinaryMessageGatewayRequest): SendMessageFrontendResponse {
+        logger.debug(
+            "Sending voice message: " +
+                    "frontend: \"{}\"; " +
+                    "chatId: \"{}\"; " +
+                    "reply to: \"{}\"; " +
+                    "base64 data len: \"{}\"",
+            request.frontend, request.chatId, request.replyToMessageId, request.data.length
+        )
 
-    fun sendText(request: SendTextMessageRequest): SendMessageResponse {
-        logger.debug("Sending text message: {}", request)
         try {
-            val sentMessage = frontendContainer.sendTextMessage(
-                body = SendMessageRequest(
-                    text = request.text,
+            val sentMessageId = frontendContainer
+                .withFrontend(request.frontend)
+                .sendImage(
+                    data = request.data,
                     replyTo = request.replyToMessageId,
                     chatId = request.chatId,
-                ),
+                )
+
+            val selfUser = dataService.createOrUpdateUser(getSelfUser(request.frontend))
+
+            val chat = dataService.createDefaultOrGetChat(
+                nativeId = request.chatId,
                 frontend = request.frontend,
             )
 
-            if (sentMessage.status != ResponseStatus.OK) {
-                return SendMessageResponse(
-                    errorMessage = sentMessage.errorMessage,
-                    status = sentMessage.status,
+            dataService.updateOrSaveNewMessage(
+                MessageEntity(
+                    mediaType = MediaType.VOICE,
+                    chatId = chat.id,
+                    userId = selfUser.id,
+                    replyToMessageNativeId = request.replyToMessageId,
+                    frontend = request.frontend,
+                    nativeId = sentMessageId
                 )
-            }
+            )
+
+            return SendMessageFrontendResponse(
+                messageId = sentMessageId,
+                status = ResponseStatus.OK,
+            )
+        } catch (ex: Exception) {
+            logger.error("An exception has occurred!", ex)
+
+            return SendMessageFrontendResponse(
+                errorMessage = ex.toString(),
+                messageId = null,
+                status = ResponseStatus.INTERNAL_SERVER_ERROR,
+            )
+        }
+    }
+
+    fun sendImage(request: SendBinaryMessageGatewayRequest): SendMessageFrontendResponse {
+        logger.debug(
+            "Sending image message: " +
+                    "frontend: \"{}\"; " +
+                    "chatId: \"{}\"; " +
+                    "reply to: \"{}\"; " +
+                    "base64 data len: \"{}\"",
+            request.frontend, request.chatId, request.replyToMessageId, request.data.length
+        )
+
+        try {
+            val sentMessageId = frontendContainer
+                .withFrontend(request.frontend)
+                .sendImage(
+                    data = request.data,
+                    replyTo = request.replyToMessageId,
+                    chatId = request.chatId,
+                )
+
+            val selfUser = dataService.createOrUpdateUser(getSelfUser(request.frontend))
+
+            val chat = dataService.createDefaultOrGetChat(
+                nativeId = request.chatId,
+                frontend = request.frontend,
+            )
+
+            dataService.updateOrSaveNewMessage(
+                MessageEntity(
+                    mediaType = MediaType.PHOTO,
+                    chatId = chat.id,
+                    userId = selfUser.id,
+                    replyToMessageNativeId = request.replyToMessageId,
+                    frontend = request.frontend,
+                    nativeId = sentMessageId
+                )
+            )
+
+            return SendMessageFrontendResponse(
+                messageId = sentMessageId,
+                status = ResponseStatus.OK,
+            )
+        } catch (ex: Exception) {
+            logger.error("An exception has occurred!", ex)
+
+            return SendMessageFrontendResponse(
+                errorMessage = ex.toString(),
+                messageId = null,
+                status = ResponseStatus.INTERNAL_SERVER_ERROR,
+            )
+        }
+    }
+
+    fun sendText(request: SendTextMessageRequest): SendMessageFrontendResponse {
+        logger.debug("Sending text message: {}", request)
+        try {
+            val sentMessageId = frontendContainer
+                .withFrontend(request.frontend)
+                .sendText(
+                    text = request.text,
+                    replyTo = request.replyToMessageId,
+                    chatId = request.chatId,
+                )
 
             val selfUser = dataService.createOrUpdateUser(getSelfUser(request.frontend))
 
@@ -66,18 +162,18 @@ class MessageSenderService(
                     userId = selfUser.id,
                     replyToMessageNativeId = request.replyToMessageId,
                     frontend = request.frontend,
-                    nativeId = sentMessage.messageId!!
+                    nativeId = sentMessageId
                 )
             )
 
-            return SendMessageResponse(
-                messageId = sentMessage.messageId,
+            return SendMessageFrontendResponse(
+                messageId = sentMessageId,
                 status = ResponseStatus.OK,
             )
         } catch (ex: Exception) {
             logger.error("An exception has occurred!", ex)
 
-            return SendMessageResponse(
+            return SendMessageFrontendResponse(
                 errorMessage = ex.toString(),
                 messageId = null,
                 status = ResponseStatus.INTERNAL_SERVER_ERROR,
@@ -88,14 +184,14 @@ class MessageSenderService(
     fun sendTypingAction(frontend: String, chatId: String): SimpleResponse {
         logger.debug("Sending typing action to frontend \"$frontend\", chat id \"$chatId\"")
 
-        frontendContainer.sendTypingAction(chatId = chatId, frontend = frontend)
+        frontendContainer.withFrontend(frontend).sendTypingAction(chatId = chatId)
 
         return SimpleResponse(
             status = ResponseStatus.OK,
         )
     }
 
-    fun getChatAdmins(frontend: String, chatId: String): ChatAdminsResponse {
+    fun getChatAdmins(frontend: String, chatId: String): ChatAdminsFrontendResponse {
         return frontendContainer.getFrontend(frontend).getChatAdmins(chatId)
     }
 
