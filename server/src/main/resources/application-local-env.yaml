@@ -10,12 +10,12 @@ spring:
 momiji:
   clients:
     bots:
-      stub: false
+      stub: true
       urls:
         - http://localhost:8093
     frontends:
       enabled: true
-      stub: false
+      stub: true
       urls:
         telegram: http://localhost:8094
 

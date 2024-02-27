@@ -1,7 +1,10 @@
 spring:
   application:
     name: messenger-gateway
-
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail_on_unknown_properties: true
 logbook:
   format.style: http
 

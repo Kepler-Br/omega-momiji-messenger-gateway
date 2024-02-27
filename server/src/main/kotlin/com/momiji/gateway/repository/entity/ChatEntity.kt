@@ -12,9 +12,10 @@ import org.springframework.data.relational.core.mapping.Table
 data class ChatEntity(
     @Id
     var id: Long? = null,
-    var createdAt: LocalDateTime? = null,
+    override var createdAt: LocalDateTime? = null,
+    override var updatedAt: LocalDateTime? = null,
     var title: String,
     var frontend: String,
     var nativeId: String,
     var type: ChatType,
-)
+): Auditable

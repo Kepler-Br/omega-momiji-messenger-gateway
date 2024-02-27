@@ -5,6 +5,7 @@ import com.momiji.api.gateway.inbound.model.ReceivedChat
 import com.momiji.api.gateway.inbound.model.ReceivedMessage
 import com.momiji.api.gateway.inbound.model.ReceivedUser
 import com.momiji.api.gateway.inbound.model.enumerator.MediaType
+import com.momiji.gateway.exception.NoMediaReceived
 import com.momiji.gateway.mapper.ChatMapper
 import com.momiji.gateway.mapper.MessageMapper
 import com.momiji.gateway.mapper.UserMapper
@@ -168,9 +169,11 @@ class DataService(
             }
         } catch (e: DbActionExecutionException) {
             try {
-                messageRepository.getByFrontendAndNativeId(
+                messageRepository.getByFrontendAndNativeIdAndChatIdAndUserId(
                     frontend = message.frontend,
-                    nativeId = message.nativeId
+                    nativeId = message.nativeId,
+                    chatId = message.chatId!!,
+                    userId = message.userId!!
                 )
             } catch (e1: Exception) {
                 // get failed. Throw original exception
@@ -207,8 +210,12 @@ class DataService(
     }
 
     private fun saveMedia(message: ReceivedMessage): Pair<String, String>? {
-        if (message.mediaBytes == null || message.mediaType == null) {
+        if (message.mediaBytes == null && message.mediaType == null) {
             return null
+        }
+
+        if (message.mediaBytes == null) {
+            throw NoMediaReceived("Received mediaType of ${message.mediaType}, but no bytes")
         }
 
         val decoded = Base64.getDecoder().decode(message.mediaBytes)

@@ -19,8 +19,9 @@ data class MessageEntity(
     var mediaType: MediaType? = null,
     var chatId: Long? = null,
     var userId: Long? = null,
-    var createdAt: LocalDateTime? = null,
+    override var createdAt: LocalDateTime? = null,
+    override var updatedAt: LocalDateTime? = null,
     var replyToMessageNativeId: String? = null,
     var frontend: String,
     var nativeId: String,
-)
+): Auditable

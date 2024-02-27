@@ -7,5 +7,10 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface MessageRepository : CrudRepository<MessageEntity, Long> {
-    fun getByFrontendAndNativeId(frontend: String, nativeId: String): MessageEntity
+    fun getByFrontendAndNativeIdAndChatIdAndUserId(
+        frontend: String,
+        nativeId: String,
+        chatId: Long,
+        userId: Long
+    ): MessageEntity
 }
