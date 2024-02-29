@@ -2,10 +2,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
-    id("org.springframework.boot") version "2.7.10"
-    id("io.spring.dependency-management") version "1.1.0"
-    kotlin("jvm") version "1.7.10" apply false
-    kotlin("plugin.spring") version "1.7.10" apply false
+    id("org.springframework.boot")
+    id("io.spring.dependency-management")
+    kotlin("jvm") apply false
+    kotlin("plugin.spring") apply false
 }
 
 subprojects {
@@ -35,14 +35,18 @@ subprojects {
             val apiVersion: String by project
             val awssdkVersion: String by project
             val guavaVersion: String by project
+            val springdocOpenapiUiVersion = "1.6.14"
+            val openApiToolsJacksonVersion = "0.1.0"
 
             dependency("com.google.guava:guava:$guavaVersion")
+            dependency("org.springdoc:springdoc-openapi-ui:$springdocOpenapiUiVersion")
+            dependency("org.openapitools:jackson-databind-nullable:$openApiToolsJacksonVersion")
 
-            dependencySet("com.momiji.api:$apiVersion") {
-                entry("omega-momiji-api")
-                entry("frontend-client-list-starter")
-                entry("bot-client-list-starter")
-            }
+//            dependencySet("com.momiji.api:$apiVersion") {
+//                entry("omega-momiji-api")
+//                entry("frontend-client-list-starter")
+//                entry("bot-client-list-starter")
+//            }
             dependencySet("software.amazon.awssdk:$awssdkVersion") {
                 entry("apache-client")
                 entry("s3")
@@ -50,8 +54,4 @@ subprojects {
         }
     }
 
-    repositories {
-        mavenCentral()
-        mavenLocal()
-    }
 }

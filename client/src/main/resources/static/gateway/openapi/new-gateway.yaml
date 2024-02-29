@@ -1,0 +1,200 @@
+openapi: 3.0.3
+info:
+  title: Omega Momiji messenger gateway
+  description: |-
+    A gateway that connects backend logic with various frontends.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8091
+tags:
+  - name: Receive
+    description: Receiving message
+paths:
+  /recieve/messages:
+    put:
+      tags:
+        - Receive
+      operationId: receiveMessage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'
+        required: true
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Client did wrong
+        '500':
+          description: Server did wrong
+
+components:
+  schemas:
+    CommonResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              description: 'Short error message'
+              example: 'Not found'
+            detailed:
+              type: string
+              description: 'Detailed error message'
+              example: 'Entity with id 404 not found'
+            type:
+              type: string
+              description: 'Exception name'
+              example: 'NotFoundException'
+    Message:
+      description: 'Message object. Inspired by Pyrogram'
+      type: object
+      required:
+        - id
+        - chat
+        - date
+        - frontend
+        - from_user
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+      properties:
+        frontend:
+          type: string
+          description: 'Frontend name. Frontend should write here its name'
+          example: telegram
+        id:
+          type: string
+          description: 'Unique message identifier inside this chat and frontend.'
+          example: '10'
+        from_user:
+          $ref: '#/components/schemas/User'
+        chat:
+          $ref: '#/components/schemas/Chat'
+        date:
+          type: string
+          description: 'Date the message was sent.'
+          format: datetime
+        forwarded_from:
+          $ref: '#/components/schemas/User'
+        forwarded_date:
+          type: string
+          description: 'For forwarded messages, date the original message was sent.'
+          format: datetime
+        reply_to_message_id:
+          type: string
+          example: '12'
+        command:
+          type: array
+          items:
+            type: string
+        media_type:
+          description: 'The message is a media message. This field will contain the enumeration type of the media message.'
+          type: string
+          enum:
+            - AUDIO
+            # Probably we should ignore documents
+            - DOCUMENT
+            - PHOTO
+            - STICKER
+            - VIDEO
+            - ANIMATION
+            - VOICE
+            - VIDEO_NOTE
+        sticker:
+          $ref: '#/components/schemas/Sticker'
+        # TODO: how to receive reactions
+        #        reactions:
+        #          type: array
+        #          items:
+        #            $ref: '#/components/schemas/Reaction'
+        service_type:
+          description: >
+            The message is a service message.
+            This field will contain the enumeration type of the service message.
+          type: string
+          enum:
+            #            - NEW_CHAT_MEMBERS
+            #            - LEFT_CHAT_MEMBERS
+            - NEW_CHAT_TITLE
+        #            - NEW_CHAT_PHOTO
+        #            - DELETE_CHAT_PHOTO
+        #            - MIGRATE_TO_CHAT_ID
+        #            - MIGRATE_FROM_CHAT_ID
+        text:
+          description: 'For text messages, the actual UTF-8 text of the message.'
+        media_bytes:
+          type: string
+          description: 'Base64 encoded media'
+    Sticker:
+      type: object
+      required:
+        - is_animated
+        - is_video
+      properties:
+        emoji:
+          type: string
+          description: 'Emoji associated with the sticker.'
+        is_animated:
+          type: boolean
+          description: 'True, if the sticker is animated'
+        is_video:
+          type: boolean
+          description: 'True, if the sticker is a video sticker'
+        mime_type:
+          type: string
+    Reaction:
+      type: object
+      properties:
+        emoji:
+          type: string
+          description: 'Emoji associated with the sticker.'
+        count:
+          type: integer
+          description: 'Reaction count.'
+    User:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: '123'
+          description: Native user ID
+        username:
+          type: string
+          example: Simpleton
+          description: Username
+        first_name:
+          type: string
+          example: Simpleton
+          description: >
+            User's or bot's first name.
+        last_name:
+          type: string
+          example: Lastnamovitch
+          description: >
+            User's or bot's last name.
+    Chat:
+      type: object
+      required:
+        - id
+        - type
+      properties:
+        id:
+          type: string
+          description: Frontend native chat ID
+          example: '12356'
+        title:
+          type: string
+          description: Chat title. If private chat, then first_name + last_name or username if no names. Or native id if nothing
+          example: Omega Momiji Dev Chat
+        type:
+          type: string
+          description: Chat type
+          example: GROUP
+          enum:
+            - GROUP
+            - PRIVATE
