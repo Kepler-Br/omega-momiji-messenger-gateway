@@ -23,7 +23,8 @@ tasks {
                 "useTags" to "true",
                 "skipDefaultInterface" to "true",
                 "useOptional" to "true",
-                "enumPropertyNaming" to "UPPERCASE"
+                "enumPropertyNaming" to "UPPERCASE",
+//                "library" to "feign"
             )
         )
     }

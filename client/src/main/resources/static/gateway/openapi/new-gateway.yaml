@@ -1,3 +1,4 @@
+# TODO: use openapi generator inheritance in models. It's not now
 openapi: 3.0.3
 info:
   title: Omega Momiji messenger gateway
@@ -7,13 +8,17 @@ info:
 servers:
   - url: http://localhost:8091
 tags:
-  - name: Receive
+  - name: ReceiveMessage
+    description: Receiving message
+  - name: SendMessage
     description: Receiving message
 paths:
-  /recieve/messages:
+
+  # ------------ inbox ------------
+  /inbox/messages:
     put:
       tags:
-        - Receive
+        - ReceiveMessage
       operationId: receiveMessage
       requestBody:
         content:
@@ -22,12 +27,144 @@ paths:
               $ref: '#/components/schemas/Message'
         required: true
       responses:
-        '201':
-          description: Created
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
         '400':
           description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
         '500':
           description: Server did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+
+  # ------------ outbox ------------
+  /outbox/text-messages:
+    post:
+      tags:
+        - SendMessage
+      summary: Send a text message
+      description: Send a text message to a frontend. This endpoint should be used by bot logic
+      operationId: sendTextMessage
+      requestBody:
+        description: Message to send
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendTextRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendMessageResponse'
+        '400':
+          description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+        '500':
+          description: Server did wrong. You're on your own now
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+  /outbox/image-messages:
+    post:
+      tags:
+        - SendMessage
+      summary: Send a image message
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageWithMediaRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendMessageResponse'
+        '400':
+          description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+        '500':
+          description: Server did wrong. You're on your own now
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+  /outbox/sticker-messages:
+    post:
+      tags:
+        - SendMessage
+      summary: Send a image message
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendStickerRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendMessageResponse'
+        '400':
+          description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+        '500':
+          description: Server did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+  /outbox/reactions:
+    post:
+      tags:
+        - SendMessage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReactRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+        '400':
+          description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+        '500':
+          description: Server did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
 
 components:
   schemas:
@@ -58,7 +195,7 @@ components:
         - date
         - frontend
         - from_user
-      allOf:
+      oneOf:
         - $ref: '#/components/schemas/CommonResponse'
       properties:
         frontend:
@@ -128,12 +265,14 @@ components:
         media_bytes:
           type: string
           description: 'Base64 encoded media'
+          example: 'SGVsbG8gd29ybGQhCg=='
     Sticker:
       type: object
       required:
         - is_animated
         - is_video
       properties:
+        # TODO: Sticker ID? So I would be able to send them too
         emoji:
           type: string
           description: 'Emoji associated with the sticker.'
@@ -145,15 +284,15 @@ components:
           description: 'True, if the sticker is a video sticker'
         mime_type:
           type: string
-    Reaction:
-      type: object
-      properties:
-        emoji:
-          type: string
-          description: 'Emoji associated with the sticker.'
-        count:
-          type: integer
-          description: 'Reaction count.'
+#    Reaction:
+#      type: object
+#      properties:
+#        emoji:
+#          type: string
+#          description: 'Emoji associated with the sticker.'
+#        count:
+#          type: integer
+#          description: 'Reaction count.'
     User:
       type: object
       required:
@@ -198,3 +337,75 @@ components:
           enum:
             - GROUP
             - PRIVATE
+    # ------------ outbox ------------
+    CommonSendMessageRequest:
+      type: object
+      required:
+        - frontend
+        - chat_id
+      properties:
+        frontend:
+          type: string
+          description: Frontend name to which the message should be sent
+          example: telegram
+        chat_id:
+          type: string
+          description: Native for frontend chat ID
+          example: '123567'
+    SendTextRequest:
+      type: object
+      required:
+        - text
+      oneOf:
+        - $ref: '#/components/schemas/CommonSendMessageRequest'
+      properties:
+        text:
+          type: string
+          description: Message body
+          example: Hello world!
+        reply_to_message_id:
+          type: string
+          description: Native for frontend message ID to reply to
+          example: '1'
+    SendMessageResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+      properties:
+        message_id:
+          type: string
+          description: Native message ID
+          example: '10'
+    SendMessageWithMediaRequest:
+      type: object
+      required:
+        - media_bytes
+      oneOf:
+        - $ref: '#/components/schemas/CommonSendMessageRequest'
+      properties:
+        media_bytes:
+          type: string
+          description: 'Base64 encoded media'
+          example: 'SGVsbG8gd29ybGQhCg=='
+    SendStickerRequest:
+      type: object
+      required:
+        - sticker_id
+      oneOf:
+        - $ref: '#/components/schemas/CommonSendMessageRequest'
+      properties:
+        sticker_id:
+          type: string
+          description: 'Sticker id to send'
+          example: '420'
+    ReactRequest:
+      type: object
+      required:
+        - rect_emoji
+      oneOf:
+        - $ref: '#/components/schemas/CommonSendMessageRequest'
+      properties:
+        rect_emoji:
+          type: string
+          description: 'Reaction emoji'
+          example: '🫡'

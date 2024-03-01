@@ -27,7 +27,7 @@ subprojects {
 
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
             mavenBom("org.zalando:logbook-bom:$logbookVersion")
-            mavenBom("io.awspring.cloud:spring-cloud-aws-dependencies:$awspringCloudVersion")
+//            mavenBom("io.awspring.cloud:spring-cloud-aws-dependencies:$awspringCloudVersion")
             mavenBom(SpringBootPlugin.BOM_COORDINATES)
         }
 
