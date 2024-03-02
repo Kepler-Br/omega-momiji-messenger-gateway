@@ -18,9 +18,10 @@ dependencies {
     implementation("org.zalando:logbook-spring-boot-starter")
     implementation(kotlin("stdlib-jdk8"))
 
-    implementation("com.momiji.api:bot-client-list-starter")
-    implementation("com.momiji.api:frontend-client-list-starter")
-    implementation("com.momiji.api:omega-momiji-api")
+//    implementation("com.momiji.api:bot-client-list-starter")
+//    implementation("com.momiji.api:frontend-client-list-starter")
+//    implementation("com.momiji.api:omega-momiji-api")
+    implementation(":gateway-api")
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }

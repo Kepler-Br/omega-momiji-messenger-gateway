@@ -13,6 +13,7 @@ tasks {
     openApiGenerate {
         generatorName.set("kotlin-spring")
         inputSpec.set("${layout.projectDirectory}/src/main/resources/static/gateway/openapi/new-gateway.yaml")
+//        inputSpec.set("${layout.projectDirectory}/src/main/resources/static/gateway/openapi/new.yaml")
         outputDir.set("${layout.buildDirectory.get()}/generated/source/openapi")
 
         apiPackage.set("com.momiji.gateway.api")
@@ -31,5 +32,17 @@ tasks {
 
     compileKotlin {
         dependsOn(openApiGenerate)
+    }
+}
+
+
+sourceSets {
+    main {
+        kotlin {
+
+        }
+        java {
+            srcDir("${layout.buildDirectory.get()}/generated/source/openapi/src/main")
+        }
     }
 }

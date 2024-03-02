@@ -224,7 +224,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Message'
+                $ref: '#/components/schemas/MessageWithFileLink'
         '400':
           description: Client did wrong
           content:
@@ -313,12 +313,12 @@ components:
       description: 'Put message request. Used for receiving message from frontend.'
       type: object
       allOf:
-        - $ref: '#/components/schemas/Message'
+        - $ref: '#/components/schemas/MessageWithMediaBytes'
     GetConcreteMessageRequest:
       description: 'Get concrete message.'
       type: object
       allOf:
-        - $ref: '#/components/schemas/Message'
+        - $ref: '#/components/schemas/MessageWithFileLink'
     GetMessageListResponse:
       description: 'Get message list.'
       type: object
@@ -328,8 +328,28 @@ components:
         messages:
           type: array
           items:
-            $ref: '#/components/schemas/Message'
-    Message:
+            $ref: '#/components/schemas/MessageWithFileLink'
+    MessageWithMediaBytes:
+      description: 'Used in message that has media_bytes in it.'
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+      properties:
+        media_bytes:
+          type: string
+          description: 'Base64 encoded media'
+          example: 'SGVsbG8gd29ybGQhCg=='
+    MessageWithFileLink:
+      description: 'Used in message that has file link in it.'
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+      properties:
+        file_link:
+          type: string
+          description: 'File link'
+          example: 'pictures/1234.png'
+    BaseMessage:
       description: 'Message object. Inspired by Pyrogram'
       type: object
       required:
@@ -406,10 +426,7 @@ components:
         #            - MIGRATE_FROM_CHAT_ID
         text:
           description: 'For text messages, the actual UTF-8 text of the message.'
-        media_bytes:
-          type: string
-          description: 'Base64 encoded media'
-          example: 'SGVsbG8gd29ybGQhCg=='
+
     Sticker:
       type: object
       required:

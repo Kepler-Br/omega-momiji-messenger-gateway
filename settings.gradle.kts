@@ -1,7 +1,7 @@
 rootProject.name = "omega-momiji-messenger-gateway"
 
-include(":server")
-include(":client")
+include(":gateway-server")
+include(":gateway-api")
 
 pluginManagement {
     val springFrameworkBootPluginVersion = "2.7.10"
