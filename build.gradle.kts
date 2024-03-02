@@ -35,7 +35,7 @@ subprojects {
             val apiVersion: String by project
             val awssdkVersion: String by project
             val guavaVersion: String by project
-            val springdocOpenapiUiVersion = "1.6.14"
+            val springdocOpenapiUiVersion = "1.7.0"
             val openApiToolsJacksonVersion = "0.1.0"
 
             dependency("com.google.guava:guava:$guavaVersion")

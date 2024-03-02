@@ -1,4 +1,3 @@
-# TODO: use openapi generator inheritance in models. It's not now
 openapi: 3.0.3
 info:
   title: Omega Momiji messenger gateway
@@ -12,19 +11,33 @@ tags:
     description: Receiving message
   - name: SendMessage
     description: Receiving message
+  - name: History
+    description: Receive history
 paths:
-
   # ------------ inbox ------------
-  /inbox/messages:
+  /inbox/frontends/{frontend_name}/chats/{chat_id}/messages:
     put:
       tags:
         - ReceiveMessage
-      operationId: receiveMessage
+      operationId: inboxReceiveMessage
+      parameters:
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
+        - name: chat_id
+          in: path
+          description: 'Chat ID'
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Message'
+              $ref: '#/components/schemas/PutMessageRequest'
         required: true
       responses:
         '200':
@@ -47,13 +60,26 @@ paths:
                 $ref: '#/components/schemas/CommonResponse'
 
   # ------------ outbox ------------
-  /outbox/text-messages:
+  /outbox/frontends/{frontend_name}/chats/{chat_id}/text-messages:
     post:
       tags:
         - SendMessage
       summary: Send a text message
       description: Send a text message to a frontend. This endpoint should be used by bot logic
-      operationId: sendTextMessage
+      operationId: outboxSendTextMessage
+      parameters:
+      - name: frontend_name
+        in: path
+        description: 'Frontend name'
+        required: true
+        schema:
+          type: string
+      - name: chat_id
+        in: path
+        description: 'Chat ID'
+        required: true
+        schema:
+          type: string
       requestBody:
         description: Message to send
         content:
@@ -74,16 +100,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/CommonResponse'
         '500':
-          description: Server did wrong. You're on your own now
+          description: Server did wrong.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommonResponse'
-  /outbox/image-messages:
+  /outbox/frontends/{frontend_name}/chats/{chat_id}/image-messages:
     post:
       tags:
         - SendMessage
-      summary: Send a image message
+      summary: Send an image message
+      operationId: outboxSendImageMessage
+      parameters:
+        - name: chat_id
+          in: path
+          description: 'Chat ID'
+          required: true
+          schema:
+            type: string
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -103,16 +143,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/CommonResponse'
         '500':
-          description: Server did wrong. You're on your own now
+          description: Server did wrong.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommonResponse'
-  /outbox/sticker-messages:
+  /outbox/frontends/{frontend_name}/chats/{chat_id}/sticker-messages:
     post:
       tags:
         - SendMessage
-      summary: Send a image message
+      summary: Send a sticker message
+      operationId: outboxSendStickerMessage
+      parameters:
+        - name: chat_id
+          in: path
+          description: 'Chat ID'
+          required: true
+          schema:
+            type: string
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -137,22 +191,91 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommonResponse'
-  /outbox/reactions:
-    post:
+
+  # ------------ history ------------
+  /history/frontends/{frontend_name}/chats/{chat_id}/messages/{message_id}:
+    get:
+      description: Get concrete message
       tags:
-        - SendMessage
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReactRequest'
+        - History
+      operationId: historyGetConcreteMessage
+      parameters:
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
+        - name: chat_id
+          in: path
+          description: 'Chat id'
+          required: true
+          schema:
+            type: string
+        - name: message_id
+          in: path
+          description: 'Message id'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Client did wrong
+          content:
+            application/json:
+              schema:
                 $ref: '#/components/schemas/CommonResponse'
+        '500':
+          description: Server did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+  /history/frontends/{frontend_name}/chats/{chat_id}/messages:
+    get:
+      description: Get message list
+      tags:
+        - History
+      operationId: historyGetListOfMessages
+      parameters:
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
+        - name: chat_id
+          in: path
+          description: 'Chat id'
+          required: true
+          schema:
+            type: string
+        - name: count
+          in: query
+          required: true
+          description: 'Total messages needed to be received'
+          schema:
+            type: integer
+            format: int32
+        - name: id
+          in: query
+          required: false
+          description: 'Message id to start from. If not set, will receive from last message'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMessageListResponse'
         '400':
           description: Client did wrong
           content:
@@ -186,6 +309,26 @@ components:
               type: string
               description: 'Exception name'
               example: 'NotFoundException'
+    PutMessageRequest:
+      description: 'Put message request. Used for receiving message from frontend.'
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Message'
+    GetConcreteMessageRequest:
+      description: 'Get concrete message.'
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Message'
+    GetMessageListResponse:
+      description: 'Get message list.'
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
     Message:
       description: 'Message object. Inspired by Pyrogram'
       type: object
@@ -195,7 +338,7 @@ components:
         - date
         - frontend
         - from_user
-      oneOf:
+      allOf:
         - $ref: '#/components/schemas/CommonResponse'
       properties:
         frontend:
@@ -253,6 +396,7 @@ components:
             This field will contain the enumeration type of the service message.
           type: string
           enum:
+            - UNKNOWN
             #            - NEW_CHAT_MEMBERS
             #            - LEFT_CHAT_MEMBERS
             - NEW_CHAT_TITLE
@@ -272,7 +416,6 @@ components:
         - is_animated
         - is_video
       properties:
-        # TODO: Sticker ID? So I would be able to send them too
         emoji:
           type: string
           description: 'Emoji associated with the sticker.'
@@ -337,7 +480,6 @@ components:
           enum:
             - GROUP
             - PRIVATE
-    # ------------ outbox ------------
     CommonSendMessageRequest:
       type: object
       required:
@@ -356,13 +498,11 @@ components:
       type: object
       required:
         - text
-      oneOf:
-        - $ref: '#/components/schemas/CommonSendMessageRequest'
       properties:
         text:
           type: string
           description: Message body
-          example: Hello world!
+          example: 'Hello world!'
         reply_to_message_id:
           type: string
           description: Native for frontend message ID to reply to
@@ -379,11 +519,9 @@ components:
     SendMessageWithMediaRequest:
       type: object
       required:
-        - media_bytes
-      oneOf:
-        - $ref: '#/components/schemas/CommonSendMessageRequest'
+        - data
       properties:
-        media_bytes:
+        data:
           type: string
           description: 'Base64 encoded media'
           example: 'SGVsbG8gd29ybGQhCg=='
@@ -391,8 +529,6 @@ components:
       type: object
       required:
         - sticker_id
-      oneOf:
-        - $ref: '#/components/schemas/CommonSendMessageRequest'
       properties:
         sticker_id:
           type: string
@@ -402,7 +538,7 @@ components:
       type: object
       required:
         - rect_emoji
-      oneOf:
+      allOf:
         - $ref: '#/components/schemas/CommonSendMessageRequest'
       properties:
         rect_emoji:
