@@ -4,98 +4,303 @@ info:
   description: |-
     A gateway that connects backend logic with various frontends.
   version: 1.0.0
-externalDocs:
-  description: Find out more about Swagger
-  url: http://swagger.io
 servers:
   - url: http://localhost:8091
 tags:
-  - name: Inbound
-    description: Everything about receiving a message
-  - name: Outbound
-    description: Everything about sending messages
-  - name: Receive
+  - name: ReceiveMessage
+    description: Receiving message
+  - name: SendMessage
+    description: Receiving message
+  - name: History
+    description: Receive history
 paths:
-  /recieve/messages:
+  # ------------ inbox ------------
+  /inbox/frontends/{frontend_name}/chats/{chat_id}/messages:
     put:
       tags:
-        - Receive
-      operationId: receiveMessage
+        - ReceiveMessage
+      operationId: inboxReceiveMessage
+      parameters:
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+        - name: chat_id
+          in: path
+          description: 'Chat ID'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InboundMessagesRequest'
-        required: true
-      responses:
-        '201':
-          description: Successful operation
-        '400':
-          description: Client did wrong
-        '500':
-          description: Server did wrong. You're on your own now
-  /inbound/messages:
-    put:
-      tags:
-        - Inbound
-      summary: Receive a message
-      description: >-
-        Receive a message from frontend.
-        This endpoint should be used by frontends.
-        This is a PUT method because messages with same id, chat id and frontend can be updated
-      operationId: receiveMessage
-      requestBody:
-        description: Message content
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InboundMessagesRequest'
+              $ref: '#/components/schemas/PutMessageRequest'
         required: true
       responses:
         '200':
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
         '400':
           description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
         '500':
-          description: Server did wrong. You're on your own now
-  /outbound/text-messages:
+          description: Server did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+
+  # ------------ outbox ------------
+  /outbox/frontends/{frontend_name}/chats/{chat_id}/text-messages:
     post:
       tags:
-        - Outbound
+        - SendMessage
       summary: Send a text message
       description: Send a text message to a frontend. This endpoint should be used by bot logic
-      operationId: sendTextMessage
+      operationId: outboxSendTextMessage
+      parameters:
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+        - name: chat_id
+          in: path
+          description: 'Chat ID'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
       requestBody:
         description: Message to send
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SendTextMessageRequest'
+              $ref: '#/components/schemas/SendTextRequest'
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SendTextMessageResponse'
+                $ref: '#/components/schemas/SendMessageResponse'
         '400':
           description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
         '500':
-          description: Server did wrong. You're on your own now
-  /outbound/frontends:
-    get:
+          description: Server did wrong.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+  /outbox/frontends/{frontend_name}/chats/{chat_id}/image-messages:
+    post:
       tags:
-        - Outbound
-      summary: Get frontend names on this gateway
-      description: Get registered frontend names on this gateway. Mostly for debug purposes
-      operationId: frontendNames
+        - SendMessage
+      summary: Send an image message
+      operationId: outboxSendImageMessage
+      parameters:
+        - name: chat_id
+          in: path
+          description: 'Chat ID'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageWithMediaRequest'
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FrontendNamesResponse'
+                $ref: '#/components/schemas/SendMessageResponse'
+        '400':
+          description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+        '500':
+          description: Server did wrong.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+  /outbox/frontends/{frontend_name}/chats/{chat_id}/sticker-messages:
+    post:
+      tags:
+        - SendMessage
+      summary: Send a sticker message
+      operationId: outboxSendStickerMessage
+      parameters:
+        - name: chat_id
+          in: path
+          description: 'Chat ID'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendStickerRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendMessageResponse'
+        '400':
+          description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+        '500':
+          description: Server did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+
+  # ------------ history ------------
+  /history/frontends/{frontend_name}/chats/{chat_id}/messages/{message_id}:
+    get:
+      description: Get concrete message
+      tags:
+        - History
+      operationId: historyGetConcreteMessage
+      parameters:
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+        - name: chat_id
+          in: path
+          description: 'Chat id'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+        - name: message_id
+          in: path
+          description: 'Message id'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageWithFileLink'
+        '400':
+          description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+        '500':
+          description: Server did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+  /history/frontends/{frontend_name}/chats/{chat_id}/messages:
+    get:
+      description: Get message list
+      tags:
+        - History
+      operationId: historyGetListOfMessages
+      parameters:
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+        - name: chat_id
+          in: path
+          description: 'Chat id'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+        - name: count
+          in: query
+          required: true
+          description: 'Total messages needed to be received'
+          schema:
+            type: integer
+            format: int32
+        - name: id
+          in: query
+          required: false
+          description: 'Message id to start from. If not set, will receive from last message'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMessageListResponse'
+        '400':
+          description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+        '500':
+          description: Server did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
 
 components:
   schemas:
@@ -117,120 +322,193 @@ components:
               type: string
               description: 'Exception name'
               example: 'NotFoundException'
-    FrontendNamesResponse:
+    PutMessageRequest:
+      description: 'Put message request. Used for receiving message from frontend.'
       type: object
-      required:
-        - names
+      allOf:
+        - $ref: '#/components/schemas/MessageWithMediaBytes'
+    GetConcreteMessageRequest:
+      description: 'Get concrete message.'
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/MessageWithFileLink'
+    GetMessageListResponse:
+      description: 'Get message list.'
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
       properties:
-        names:
+        messages:
           type: array
-          description: A list of frontend names. You can send messages to this frontends
-          example:
-            - telegram
-            - discord
           items:
-            type: string
-    SendTextMessageRequest:
+            $ref: '#/components/schemas/MessageWithFileLink'
+    MessageWithMediaBytes:
+      description: 'Used in message that has media_bytes in it.'
       type: object
-      required:
-        - frontend
-        - text
-        - chat_id
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
       properties:
-        frontend:
+        media_bytes:
           type: string
-          description: Frontend name to which the message should be sent
-          example: telegram
-        text:
-          type: string
-          description: Message body
-          example: Hello world!
-        chat_id:
-          type: string
-          description: Native for frontend chat ID
-          example: '123567'
-        reply_to_message_id:
-          type: string
-          description: Native for frontend message ID to reply to
-          example: '1'
-    SendTextMessageResponse:
+          description: 'Base64 encoded media'
+          example: 'SGVsbG8gd29ybGQhCg=='
+    MessageWithFileLink:
+      description: 'Used in message that has file link in it.'
       type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
       properties:
-        error_message:
+        file_link:
           type: string
-          description: If you're licky, there will be a error message
-          example: Something bad happened!
-        message_id:
-          type: string
-          description: Native message ID
-          example: '10'
-    InboundMessagesRequest:
+          description: 'File link'
+          example: 'pictures/1234.png'
+    BaseMessage:
+      description: 'Message object. Inspired by Pyrogram'
       type: object
       required:
         - id
-        - author
         - chat
+        - date
         - frontend
-        - type
+        - from_user
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
       properties:
+        frontend:
+          type: string
+          description: 'Frontend name. Frontend should write here its name'
+          example: telegram
         id:
           type: string
-          description: A native message ID
+          description: 'Unique message identifier inside this chat and frontend.'
           example: '10'
-        author:
-          $ref: '#/components/schemas/Author'
+        from_user:
+          $ref: '#/components/schemas/User'
         chat:
           $ref: '#/components/schemas/Chat'
-        frontend:
+        date:
           type: string
-          description: Frontend name. Frontend should write here its name
-          example: telegram
-        text:
+          description: 'Date the message was sent.'
+          format: datetime
+        forwarded_from:
+          $ref: '#/components/schemas/User'
+        forwarded_date:
           type: string
-          description: Message text
-          example: Hello world!
-        type:
+          description: 'For forwarded messages, date the original message was sent.'
+          format: datetime
+        reply_to_message_id:
           type: string
-          example: MESSAGE
+          example: '12'
+#        command:
+#          type: array
+#          items:
+#            type: string
+        media_type:
+          description: 'The message is a media message. This field will contain the enumeration type of the media message.'
+          type: string
           enum:
-            - MESSAGE
-            - ACTION
-        action_info:
-          $ref: '#/components/schemas/ActionInfo'
-    Author:
+            - AUDIO
+            # Probably we should ignore documents
+            - DOCUMENT
+            - PHOTO
+            - STICKER
+            - VIDEO
+            - ANIMATION
+            - VOICE
+            - VIDEO_NOTE
+        sticker:
+          $ref: '#/components/schemas/Sticker'
+        # TODO: how to receive reactions
+        #        reactions:
+        #          type: array
+        #          items:
+        #            $ref: '#/components/schemas/Reaction'
+        service_type:
+          description: >
+            The message is a service message.
+            This field will contain the enumeration type of the service message.
+          type: string
+          enum:
+            - UNKNOWN
+            #            - NEW_CHAT_MEMBERS
+            #            - LEFT_CHAT_MEMBERS
+            - NEW_CHAT_TITLE
+        #            - NEW_CHAT_PHOTO
+        #            - DELETE_CHAT_PHOTO
+        #            - MIGRATE_TO_CHAT_ID
+        #            - MIGRATE_FROM_CHAT_ID
+        text:
+          description: 'For text messages, the actual UTF-8 text of the message.'
+
+    Sticker:
+      type: object
+      required:
+        - is_animated
+        - is_video
+      properties:
+        emoji:
+          type: string
+          description: 'Emoji associated with the sticker.'
+        is_animated:
+          type: boolean
+          description: 'True, if the sticker is animated'
+        is_video:
+          type: boolean
+          description: 'True, if the sticker is a video sticker'
+        mime_type:
+          type: string
+    #    Reaction:
+    #      type: object
+    #      properties:
+    #        emoji:
+    #          type: string
+    #          description: 'Emoji associated with the sticker.'
+    #        count:
+    #          type: integer
+    #          description: 'Reaction count.'
+    User:
       type: object
       required:
         - id
-        - username
-        - fullname
       properties:
         id:
           type: string
           example: '123'
           description: Native user ID
+          maxLength: 100
         username:
           type: string
           example: Simpleton
           description: Username
-        fullname:
+          maxLength: 1024
+        first_name:
           type: string
-          example: Fullname
-          description: User\'s fullname that consists of firstname and lastname
+          example: Simpleton
+          description: >
+            User's or bot's first name.
+          maxLength: 1024
+        last_name:
+          type: string
+          example: Lastnamovitch
+          description: >
+            User's or bot's last name.
+          maxLength: 1024
     Chat:
       type: object
       required:
         - id
-        - title
         - type
       properties:
         id:
           type: string
           description: Frontend native chat ID
           example: '12356'
+          maxLength: 100
         title:
           type: string
-          description: Chat title
+          description: Chat title. If private chat, then first_name + last_name or username if no names. Or native id if nothing
           example: Omega Momiji Dev Chat
+          maxLength: 1024
         type:
           type: string
           description: Chat type
@@ -238,19 +516,68 @@ components:
           enum:
             - GROUP
             - PRIVATE
-    ActionInfo:
+    CommonSendMessageRequest:
       type: object
       required:
-        - action_type
-        - related_user
+        - frontend
+        - chat_id
       properties:
-        action_type:
+        frontend:
           type: string
-          example: NEW_MEMBER
-          description: Action type. NEW_MEMBER - new member; MEMBER_LEFT - member left; OTHER - actions that is in no interest for gateway
-          enum:
-            - NEW_MEMBER
-            - MEMBER_LEFT
-            - OTHER
-        related_user:
-          $ref: '#/components/schemas/Author'
+          description: Frontend name to which the message should be sent
+          example: telegram
+        chat_id:
+          type: string
+          description: Native for frontend chat ID
+          example: '123567'
+    SendTextRequest:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          description: Message body
+          example: 'Hello world!'
+        reply_to_message_id:
+          type: string
+          description: Native for frontend message ID to reply to
+          example: '1'
+    SendMessageResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+      properties:
+        message_id:
+          type: string
+          description: Native message ID
+          example: '10'
+    SendMessageWithMediaRequest:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: string
+          description: 'Base64 encoded media'
+          example: 'SGVsbG8gd29ybGQhCg=='
+    SendStickerRequest:
+      type: object
+      required:
+        - sticker_id
+      properties:
+        sticker_id:
+          type: string
+          description: 'Sticker id to send'
+          example: '420'
+    ReactRequest:
+      type: object
+      required:
+        - rect_emoji
+      allOf:
+        - $ref: '#/components/schemas/CommonSendMessageRequest'
+      properties:
+        rect_emoji:
+          type: string
+          description: 'Reaction emoji'
+          example: '🫡'

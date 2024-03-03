@@ -1,0 +1,11 @@
+---
+databaseChangeLog:
+  - include:
+      relativeToChangelogFile: true
+      file: chats.sql
+  - include:
+      relativeToChangelogFile: true
+      file: users.sql
+  - include:
+      relativeToChangelogFile: true
+      file: messages.sql

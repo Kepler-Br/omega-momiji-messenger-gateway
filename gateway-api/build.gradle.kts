@@ -12,7 +12,7 @@ dependencies {
 tasks {
     openApiGenerate {
         generatorName.set("kotlin-spring")
-        inputSpec.set("${layout.projectDirectory}/src/main/resources/static/gateway/openapi/new-gateway.yaml")
+        inputSpec.set("${layout.projectDirectory}/src/main/resources/static/gateway/openapi/gateway.yaml")
 //        inputSpec.set("${layout.projectDirectory}/src/main/resources/static/gateway/openapi/new.yaml")
         outputDir.set("${layout.buildDirectory.get()}/generated/source/openapi")
 
