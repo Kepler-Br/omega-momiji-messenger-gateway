@@ -1,0 +1,210 @@
+openapi: 3.0.3
+info:
+  title: Omega Momiji messenger gateway
+  description: |-
+    A gateway that connects backend logic with various frontends.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8091
+tags:
+  - name: GatewayInbox
+    description: Receiving message
+paths:
+  /inbox/frontends/{frontend_name}/chats/{chat_id}/messages:
+    put:
+      tags:
+        - GatewayInbox
+      operationId: inboxReceiveMessage
+      parameters:
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+        - name: chat_id
+          in: path
+          description: 'Chat ID'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboxNewMessage'
+        required: true
+      responses:
+        '400':
+          description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              description: 'Short error message'
+              example: 'Not found'
+            detailed:
+              type: string
+              description: 'Detailed error message'
+              example: 'Entity with id 404 not found'
+            type:
+              type: string
+              description: 'Exception name'
+              example: 'NotFoundException'
+    InboxNewMessage:
+      description: 'Message object. Inspired by Pyrogram'
+      type: object
+      required:
+        - id
+        - chat
+        - date
+        - frontend
+        - from_user
+      properties:
+        frontend:
+          type: string
+          description: 'Frontend name. Frontend should write here its name'
+          example: telegram
+        id:
+          type: string
+          description: 'Unique message identifier inside this chat and frontend.'
+          example: '10'
+        from_user:
+          $ref: '#/components/schemas/InboxUser'
+        chat:
+          $ref: '#/components/schemas/InboxChat'
+        date:
+          type: string
+          description: 'Date the message was sent.'
+          format: datetime
+        forwarded_from:
+          $ref: '#/components/schemas/InboxUser'
+        forwarded_date:
+          type: string
+          description: 'For forwarded messages, date the original message was sent.'
+          format: datetime
+        reply_to_message_id:
+          type: string
+          example: '12'
+        media_type:
+          description: 'The message is a media message. This field will contain the enumeration type of the media message.'
+          type: string
+          enum:
+            - AUDIO
+            # Probably we should ignore documents
+            - DOCUMENT
+            - PHOTO
+            - STICKER
+            - VIDEO
+            - ANIMATION
+            - VOICE
+            - VIDEO_NOTE
+        sticker:
+          $ref: '#/components/schemas/InboxSticker'
+        # TODO: how to receive reactions
+        #        reactions:
+        #          type: array
+        #          items:
+        #            $ref: '#/components/schemas/Reaction'
+        service_type:
+          description: >
+            The message is a service message.
+            This field will contain the enumeration type of the service message.
+          type: string
+          enum:
+            - UNKNOWN
+            - NEW_CHAT_TITLE
+            - MIGRATE_TO_CHAT_ID
+            - MIGRATE_FROM_CHAT_ID
+        text:
+          description: 'For text messages, the actual UTF-8 text of the message.'
+        media_bytes:
+          type: string
+          description: 'Base64 encoded media'
+          example: 'SGVsbG8gd29ybGQhCg=='
+    InboxUser:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: '123'
+          description: Native user ID
+          maxLength: 100
+        username:
+          type: string
+          example: Simpleton
+          description: Username
+          maxLength: 1024
+        first_name:
+          type: string
+          example: Simpleton
+          description: >
+            User's or bot's first name.
+          maxLength: 1024
+        last_name:
+          type: string
+          example: Lastnamovitch
+          description: >
+            User's or bot's last name.
+          maxLength: 1024
+    InboxChat:
+      type: object
+      required:
+        - id
+        - type
+      properties:
+        id:
+          type: string
+          description: Frontend native chat ID
+          example: '12356'
+          maxLength: 100
+        title:
+          type: string
+          description: Chat title. If private chat, then first_name + last_name or username if no names. Or native id if nothing
+          example: Omega Momiji Dev Chat
+          maxLength: 1024
+        type:
+          type: string
+          description: Chat type
+          example: GROUP
+          enum:
+            - GROUP
+            - PRIVATE
+    InboxSticker:
+      type: object
+      required:
+        - is_animated
+        - is_video
+      properties:
+        emoji:
+          type: string
+          description: 'Emoji associated with the sticker.'
+        is_animated:
+          type: boolean
+          description: 'True, if the sticker is animated'
+        is_video:
+          type: boolean
+          description: 'True, if the sticker is a video sticker'
+        mime_type:
+          type: string

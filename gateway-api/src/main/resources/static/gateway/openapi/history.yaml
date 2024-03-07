@@ -1,0 +1,266 @@
+openapi: 3.0.3
+info:
+  title: Omega Momiji messenger gateway
+  description: |-
+    A gateway that connects backend logic with various frontends.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8091
+tags:
+  - name: GatewayHistory
+    description: Receive history
+paths:
+  /history/frontends/{frontend_name}/chats/{chat_native_id}/messages/{message_native_id}:
+    get:
+      description: Get concrete message
+      tags:
+        - GatewayHistory
+      operationId: historyGetConcreteMessage
+      parameters:
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+        - name: chat_native_id
+          in: path
+          description: 'Chat id'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+        - name: message_native_id
+          in: path
+          description: 'Message native id'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryMessage'
+        '400':
+          description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /history/frontends/{frontend_name}/chats/{chat_id}/messages:
+    get:
+      description: Get message list
+      tags:
+        - GatewayHistory
+      operationId: historyGetListOfMessages
+      parameters:
+        - name: frontend_name
+          in: path
+          description: 'Frontend name'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+        - name: chat_id
+          in: path
+          description: 'Chat id'
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+        - name: count
+          in: query
+          required: true
+          description: 'Total messages needed to be received'
+          schema:
+            type: integer
+            format: int32
+        - name: id
+          in: query
+          required: false
+          description: 'Message id to start from. If not set, will receive from last message'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMessageListResponse'
+        '400':
+          description: Client did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server did wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              description: 'Short error message'
+              example: 'Not found'
+            detailed:
+              type: string
+              description: 'Detailed error message'
+              example: 'Entity with id 404 not found'
+            type:
+              type: string
+              description: 'Exception name'
+              example: 'NotFoundException'
+    GetMessageListResponse:
+      description: 'Get message list.'
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryMessage'
+    HistoryMessage:
+      description: 'Message object. Inspired by Pyrogram'
+      type: object
+      required:
+        - native_id
+        - chat
+        - date
+        - from_user
+      properties:
+        native_id:
+          type: string
+          description: 'Unique message identifier inside this chat and frontend.'
+          example: '10'
+        from_user:
+          $ref: '#/components/schemas/HistoryUser'
+        chat:
+          $ref: '#/components/schemas/HistoryChat'
+        date:
+          type: string
+          description: 'Date the message was sent.'
+          format: datetime
+        forwarded_from:
+          $ref: '#/components/schemas/HistoryUser'
+        forwarded_date:
+          type: string
+          description: 'For forwarded messages, date the original message was sent.'
+          format: datetime
+        reply_to_message_native_id:
+          type: string
+          example: '12'
+        command:
+          type: array
+          items:
+            type: string
+        media_type:
+          description: 'The message is a media message. This field will contain the enumeration type of the media message.'
+          type: string
+          enum:
+            - AUDIO
+            # Probably we should ignore documents
+            - DOCUMENT
+            - PHOTO
+            - STICKER
+            - VIDEO
+            - ANIMATION
+            - VOICE
+            - VIDEO_NOTE
+        sticker:
+          $ref: '#/components/schemas/HistorySticker'
+        text:
+          description: 'For text messages, the actual UTF-8 text of the message.'
+        file_link:
+          type: string
+          description: 'File link'
+          example: 'pictures/1234.png'
+    HistorySticker:
+      type: object
+      required:
+        - is_animated
+        - is_video
+      properties:
+        emoji:
+          type: string
+          description: 'Emoji associated with the sticker.'
+        is_animated:
+          type: boolean
+          description: 'True, if the sticker is animated'
+        is_video:
+          type: boolean
+          description: 'True, if the sticker is a video sticker'
+        mime_type:
+          type: string
+        file_link:
+          type: string
+          description: 'File link'
+          example: 'pictures/1234.png'
+    HistoryUser:
+      type: object
+      required:
+        - native_id
+      properties:
+        native_id:
+          type: string
+          example: '123'
+          description: Native user ID
+          maxLength: 100
+        username:
+          type: string
+          example: Simpleton
+          description: Username
+          maxLength: 1024
+        first_name:
+          type: string
+          example: Simpleton
+          description: >
+            User's or bot's first name.
+          maxLength: 1024
+        last_name:
+          type: string
+          example: Lastnamovitch
+          description: >
+            User's or bot's last name.
+          maxLength: 1024
+    HistoryChat:
+      type: object
+      required:
+        - type
+      properties:
+        native_id:
+          type: string
+          description: Chat native ID
+          example: '12356'
+          maxLength: 100
+        title:
+          type: string
+          description: Chat title. If private chat, then first_name + last_name or username if no names. Or native id if nothing
+          example: Omega Momiji Dev Chat
+          maxLength: 1024
+        type:
+          type: string
+          description: Chat type
+          example: GROUP
+          enum:
+            - GROUP
+            - PRIVATE

@@ -1,11 +1,29 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
-    id("org.springframework.boot")
-    id("io.spring.dependency-management")
-    kotlin("jvm") apply false
-    kotlin("plugin.spring") apply false
+    id("org.springframework.boot") version "3.1.4" apply false
+    id("io.spring.dependency-management") version "1.1.4"
+    kotlin("jvm") version "1.7.20"
+    kotlin("plugin.spring") version "1.7.20"
+}
+
+extra["springCloudVersion"] = "2022.0.3"
+
+allprojects {
+    group = "kepler.momiji.gateway"
+    version = "0.0.1"
+    tasks.withType<JavaCompile> {
+        options.encoding = "UTF-8"
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
+    }
+
+    tasks.withType<KotlinCompile> {
+        kotlinOptions {
+            freeCompilerArgs = listOf("-Xjsr305=strict")
+            jvmTarget = "17"
+        }
+    }
 }
 
 subprojects {
@@ -13,45 +31,16 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.plugin.spring")
 
-    tasks.withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "17"
-        }
-    }
 
     dependencyManagement {
         imports {
-            val springCloudVersion: String by project
-            val logbookVersion: String by project
-            val awspringCloudVersion: String by project
-
-            mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
-            mavenBom("org.zalando:logbook-bom:$logbookVersion")
-//            mavenBom("io.awspring.cloud:spring-cloud-aws-dependencies:$awspringCloudVersion")
-            mavenBom(SpringBootPlugin.BOM_COORDINATES)
+            mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
         }
 
         dependencies {
-            val apiVersion: String by project
-            val awssdkVersion: String by project
-            val guavaVersion: String by project
-            val springdocOpenapiUiVersion = "1.7.0"
-            val openApiToolsJacksonVersion = "0.1.0"
-
-            dependency("com.google.guava:guava:$guavaVersion")
-            dependency("org.springdoc:springdoc-openapi-ui:$springdocOpenapiUiVersion")
-            dependency("org.openapitools:jackson-databind-nullable:$openApiToolsJacksonVersion")
-
-//            dependencySet("com.momiji.api:$apiVersion") {
-//                entry("omega-momiji-api")
-//                entry("frontend-client-list-starter")
-//                entry("bot-client-list-starter")
-//            }
-            dependencySet("software.amazon.awssdk:$awssdkVersion") {
-                entry("apache-client")
-                entry("s3")
-            }
+//            dependency("com.google.guava:guava:$guavaVersion")
+//            dependency("org.springdoc:springdoc-openapi-ui:$springdocOpenapiUiVersion")
+//            dependency("org.openapitools:jackson-databind-nullable:$openApiToolsJacksonVersion")
         }
     }
-
 }

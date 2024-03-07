@@ -5,23 +5,15 @@ plugins {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
-    implementation("org.springframework.cloud:spring-cloud-starter-sleuth")
-
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    implementation("io.zipkin.reporter2:zipkin-reporter-brave")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.postgresql:postgresql")
-    implementation("software.amazon.awssdk:apache-client")
-    implementation("software.amazon.awssdk:s3")
-    implementation("com.google.guava:guava")
-    implementation("org.zalando:logbook-spring-boot-starter")
-    implementation(kotlin("stdlib-jdk8"))
-
-//    implementation("com.momiji.api:bot-client-list-starter")
-//    implementation("com.momiji.api:frontend-client-list-starter")
-//    implementation("com.momiji.api:omega-momiji-api")
-    implementation(":gateway-api")
-
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    implementation("org.liquibase:liquibase-core")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+    runtimeOnly("org.postgresql:postgresql")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
