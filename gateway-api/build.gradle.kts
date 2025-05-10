@@ -3,17 +3,20 @@ plugins {
 }
 
 dependencies {
-    implementation("org.springdoc:springdoc-openapi-ui")
-    implementation("org.openapitools:jackson-databind-nullable")
-    implementation("jakarta.servlet:jakarta.servlet-api")
-    implementation("jakarta.annotation:jakarta.annotation-api")
+    // TODO: version
+    api("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    api("jakarta.validation:jakarta.validation-api:3.0.2")
+    api("org.springframework:spring-web:6.2.6")
+    api("org.springframework:spring-context:6.2.6")
+    api("io.swagger.core.v3:swagger-annotations-jakarta:2.2.30")
+    api("io.swagger.core.v3:swagger-models-jakarta:2.2.30")
+    api("com.fasterxml.jackson.core:jackson-annotations:2.18.3")
 }
 
 tasks {
     openApiGenerate {
         generatorName.set("kotlin-spring")
         inputSpec.set("${layout.projectDirectory}/src/main/resources/static/gateway/openapi/gateway.yaml")
-//        inputSpec.set("${layout.projectDirectory}/src/main/resources/static/gateway/openapi/new.yaml")
         outputDir.set("${layout.buildDirectory.get()}/generated/source/openapi")
 
         apiPackage.set("com.momiji.gateway.api")
@@ -25,7 +28,7 @@ tasks {
                 "skipDefaultInterface" to "true",
                 "useOptional" to "true",
                 "enumPropertyNaming" to "UPPERCASE",
-//                "library" to "feign"
+                "useSpringBoot3" to "true",
             )
         )
     }
@@ -35,12 +38,8 @@ tasks {
     }
 }
 
-
 sourceSets {
     main {
-        kotlin {
-
-        }
         java {
             srcDir("${layout.buildDirectory.get()}/generated/source/openapi/src/main")
         }

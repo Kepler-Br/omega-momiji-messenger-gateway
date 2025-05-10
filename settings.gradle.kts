@@ -4,17 +4,11 @@ include(":gateway-server")
 include(":gateway-api")
 
 pluginManagement {
-    val springFrameworkBootPluginVersion = "2.7.10"
-    val springDependencyManagementPluginVersion = "1.1.0"
-    val kotlinJvmVersionPluginVersion = "1.7.10"
-    val kotlinSpringPluginVersion = "1.7.10"
-    val openapiGeneratorPluginVersion = "7.3.0"
-
     plugins {
-        id("org.springframework.boot") version springFrameworkBootPluginVersion
-        id("io.spring.dependency-management") version springDependencyManagementPluginVersion
-        id("org.openapi.generator") version openapiGeneratorPluginVersion
-        kotlin("jvm") version kotlinJvmVersionPluginVersion
-        kotlin("plugin.spring") version kotlinSpringPluginVersion
+        id("org.openapi.generator") version "7.12.0"
+        kotlin("jvm") version "1.9.25"
+        kotlin("plugin.spring") version "1.9.25"
+        id("org.springframework.boot") version "3.4.5"
+        id("io.spring.dependency-management") version "1.1.7"
     }
 }

@@ -5,10 +5,7 @@ import java.time.LocalDateTime
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 
-@Table(
-    name = "chats",
-    schema = "gateway",
-)
+@Table(name = "chats")
 data class ChatEntity(
     @Id
     var id: Long? = null,

@@ -16,7 +16,7 @@ create table messages
         constraint fk_messages_users_id references gateway.users (id),
     frontend                   varchar(100)                         not null,
     native_id                  varchar(100)                         not null,
-    reply_to_message_native_id varchar(100),
+    reply_to_message_id varchar(100),
     message_date               datetime                             not null,
     created_at                 timestamp null default now(),
     updated_at                 timestamp null default now()

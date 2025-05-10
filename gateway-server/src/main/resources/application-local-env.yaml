@@ -25,11 +25,9 @@ logging:
     com.momiji.gateway.service: trace
     com.momiji.gateway.controller: trace
 
-s3:
-  region: us-east-1
-  host: localhost
-  port: 9000
-  path: /
-  scheme: http
-  access-key-id: accessKey1
-  secret-access-key: verySecretKey1
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    enabled: true
+    path: /openapi/gateway.yaml
