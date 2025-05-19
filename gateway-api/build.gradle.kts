@@ -1,16 +1,25 @@
 plugins {
+    id("java-library")
+    id("maven-publish")
     id("org.openapi.generator")
 }
 
 dependencies {
     // TODO: version
-    api("jakarta.servlet:jakarta.servlet-api:6.0.0")
-    api("jakarta.validation:jakarta.validation-api:3.0.2")
-    api("org.springframework:spring-web:6.2.6")
-    api("org.springframework:spring-context:6.2.6")
+    api("jakarta.servlet:jakarta.servlet-api")
+    api("jakarta.validation:jakarta.validation-api")
+    compileOnly("org.springframework:spring-web")
+    compileOnly("org.springframework:spring-context")
+//    api("io.swagger.core.v3:swagger-annotations-jakarta")
+//    api("io.swagger.core.v3:swagger-models-jakarta")
+    api("com.fasterxml.jackson.core:jackson-annotations")
+//    api("jakarta.servlet:jakarta.servlet-api:6.0.0")
+//    api("jakarta.validation:jakarta.validation-api:3.0.2")
+//    api("org.springframework:spring-web:6.2.6")
+//    api("org.springframework:spring-context:6.2.6")
     api("io.swagger.core.v3:swagger-annotations-jakarta:2.2.30")
     api("io.swagger.core.v3:swagger-models-jakarta:2.2.30")
-    api("com.fasterxml.jackson.core:jackson-annotations:2.18.3")
+//    api("com.fasterxml.jackson.core:jackson-annotations:2.18.3")
 }
 
 tasks {

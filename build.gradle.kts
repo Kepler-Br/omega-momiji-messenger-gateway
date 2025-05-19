@@ -2,10 +2,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
-    kotlin("jvm") apply false
-    kotlin("plugin.spring") apply false
-    id("org.springframework.boot")
     id("io.spring.dependency-management")
+    id("org.openapi.generator") apply false
+    id("org.springframework.boot") apply false
+    kotlin("jvm")
+    kotlin("plugin.spring") apply false
 }
 
 subprojects {
@@ -13,22 +14,22 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.plugin.spring")
 
-    // TODO:
-//    java {
-//        toolchain {
-//            languageVersion = JavaLanguageVersion.of(21)
-//        }
-//    }
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+        withJavadocJar()
+//        withSourcesJar()
+    }
 
-    // TODO:
-//    kotlin {
-//        compilerOptions {
-//            freeCompilerArgs.addAll("-Xjsr305=strict")
-//        }
-//    }
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll("-Xjsr305=strict")
+        }
+    }
 
     dependencyManagement {
-//        imports {
+        imports {
 //            val springCloudVersion: String by project
 //            val logbookVersion: String by project
 //            val awspringCloudVersion: String by project
@@ -36,8 +37,8 @@ subprojects {
 //            mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
 //            mavenBom("org.zalando:logbook-bom:$logbookVersion")
 ////            mavenBom("io.awspring.cloud:spring-cloud-aws-dependencies:$awspringCloudVersion")
-//            mavenBom(SpringBootPlugin.BOM_COORDINATES)
-//        }
+            mavenBom(SpringBootPlugin.BOM_COORDINATES)
+        }
 
         dependencies {
             dependency("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
