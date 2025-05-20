@@ -10,7 +10,7 @@ dependencies {
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.liquibase:liquibase-core")
+//    implementation("org.liquibase:liquibase-core")
     implementation("org.postgresql:postgresql")
 
     implementation(project(":gateway-api"))

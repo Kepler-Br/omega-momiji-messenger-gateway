@@ -6,6 +6,8 @@ spring:
     username: nonroot
     password: nonroot
     url: jdbc:postgresql://localhost:5432/omega
+  kafka:
+    bootstrap-servers: localhost:9092
 
 momiji:
   clients:
